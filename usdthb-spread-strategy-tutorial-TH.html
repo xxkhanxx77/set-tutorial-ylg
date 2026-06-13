@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หนึ่งดอลลาร์ สองราคา — กลยุทธ์ spread ระหว่าง Binance TH (spot) × TFEX (futures)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F6F2; --ink:#15211C; --muted:#5C6B63; --line:#D9DFD6; --soft:#EAEEE7;
+  --tfex:#2C45A8; --tfex-soft:#E4E9F8; --binance:#B45309; --binance-fill:#F59E0B; --binance-soft:#FBEEDB;
+  --gain:#1A7A4C; --gain-soft:#E2F1E8; --loss:#C0392B; --loss-soft:#F8E7E3;
+  --codebg:#101915; --codetx:#D7E4DC; --codecm:#71857A; --codest:#E8B45A; --codekw:#8FB4FF; --codenum:#7FD9A8;
+  --sans:'IBM Plex Sans','Noto Sans Thai',system-ui,sans-serif;
+  --cond:'IBM Plex Sans Condensed','Noto Sans Thai',system-ui,sans-serif;
+  --thai:'Noto Sans Thai','IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --maxw:1180px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important}}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--thai);
+  font-size:16.5px; line-height:1.72;
+  background-image:linear-gradient(var(--soft) 1px,transparent 1px),linear-gradient(90deg,var(--soft) 1px,transparent 1px);
+  background-size:36px 36px;
+}
+::selection{background:#CBD8F5}
+
+/* ---------- top strip + header ---------- */
+.disclaimer-strip{
+  background:var(--ink);color:#E8EFE9;font-family:var(--thai);font-size:12.5px;letter-spacing:.01em;
+  padding:8px 18px;text-align:center;
+}
+.disclaimer-strip b{color:var(--binance-fill);font-weight:600}
+header.site{
+  position:sticky;top:0;z-index:50;background:rgba(244,246,242,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+}
+.site-inner{max-width:var(--maxw);margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:14px}
+.mark{display:flex;align-items:center;gap:9px;font-family:var(--cond);font-weight:700;font-size:17px;letter-spacing:.01em;white-space:nowrap}
+.mark .dot{width:10px;height:10px;border-radius:50%}
+.mark .dot.t{background:var(--tfex)} .mark .dot.b{background:var(--binance-fill);margin-left:-13px;mix-blend-mode:multiply}
+.site-meta{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+@media(max-width:760px){.site-meta{display:none}}
+
+/* ---------- layout grid ---------- */
+.shell{max-width:var(--maxw);margin:0 auto;padding:0 24px;display:grid;grid-template-columns:208px minmax(0,1fr);gap:44px}
+@media(max-width:980px){.shell{grid-template-columns:minmax(0,1fr)}}
+
+/* step rail */
+nav.rail{position:sticky;top:84px;align-self:start;padding:28px 0 40px;font-family:var(--thai)}
+nav.rail .rail-label{font-size:10.5px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px;font-family:var(--mono)}
+nav.rail a{
+  display:flex;gap:10px;align-items:baseline;text-decoration:none;color:var(--muted);
+  font-size:13.5px;padding:5.5px 8px;border-left:2px solid var(--line);transition:color .15s,border-color .15s;
+}
+nav.rail a .n{font-weight:600;min-width:20px;font-family:var(--mono);font-size:12px}
+nav.rail a:hover{color:var(--ink)}
+nav.rail a.active{color:var(--ink);border-left-color:var(--ink);background:linear-gradient(90deg,var(--soft),transparent)}
+@media(max-width:980px){
+  nav.rail{position:sticky;top:57px;z-index:40;background:rgba(244,246,242,.95);backdrop-filter:blur(8px);
+    display:flex;overflow-x:auto;gap:4px;padding:10px 0;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
+  nav.rail .rail-label{display:none}
+  nav.rail a{border-left:none;border:1px solid var(--line);border-radius:999px;padding:5px 11px;white-space:nowrap;background:#fff}
+  nav.rail a.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+}
+
+main{padding:34px 0 60px;min-width:0}
+
+/* ---------- type ---------- */
+h1{font-family:var(--cond);font-weight:700;font-size:clamp(36px,5.6vw,60px);line-height:1.05;letter-spacing:-.012em}
+h1 .t{color:var(--tfex)} h1 .b{color:var(--binance)}
+h2{font-family:var(--cond);font-weight:700;font-size:clamp(24px,3.3vw,32px);line-height:1.2;margin:0 0 14px}
+h3{font-family:var(--cond);font-weight:600;font-size:20.5px;margin:30px 0 8px;line-height:1.3}
+p{margin:0 0 14px;max-width:74ch}
+a{color:var(--tfex)}
+strong{font-weight:600}
+.lede{font-size:18.5px;color:#2C3B33;max-width:64ch;line-height:1.66}
+.thai{font-family:var(--thai);background:var(--soft);border-left:3px solid var(--ink);
+  padding:11px 15px;margin:18px 0 6px;font-size:15.5px;max-width:76ch;border-radius:0 6px 6px 0;line-height:1.7}
+.thai b{font-weight:600}
+.note-en{font-family:var(--mono);font-size:12.5px;color:var(--muted);letter-spacing:.01em}
+.small{font-size:13.5px;color:var(--muted)}
+.mono{font-family:var(--mono)}
+
+/* section scaffolding */
+section.step{padding:46px 0 8px;scroll-margin-top:90px}
+.step-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+.step-no{font-family:var(--mono);font-weight:600;font-size:13px;color:#fff;background:var(--ink);
+  padding:3px 9px;border-radius:5px;letter-spacing:.06em}
+.step-kicker{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.costbar-divider{border:none;border-top:2px dashed var(--loss);opacity:.5;margin:48px 0 0;position:relative}
+.costbar-divider::after{content:'— entry bar —';position:absolute;right:0;top:-9px;background:var(--paper);
+  font-family:var(--mono);font-size:10px;color:var(--loss);padding:0 6px;letter-spacing:.1em}
+
+/* venue chips */
+.chip{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:600;padding:2px 9px;border-radius:5px;white-space:nowrap}
+.chip.t{background:var(--tfex-soft);color:var(--tfex)}
+.chip.b{background:var(--binance-soft);color:var(--binance)}
+.chip.g{background:var(--gain-soft);color:var(--gain)}
+.chip.r{background:var(--loss-soft);color:var(--loss)}
+
+/* ---------- hero ---------- */
+.hero{padding:46px 0 10px}
+.hero .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+.hero h1 .en{display:block;font-family:var(--mono);font-weight:600;font-size:clamp(15px,2vw,22px);color:var(--muted);letter-spacing:0;margin-top:10px}
+.hero-sub{margin:18px 0 8px;font-size:18px;max-width:64ch;color:#2C3B33;line-height:1.7}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 8px}
+
+/* spread rail (signature) */
+.spreadrail{margin:30px 0 8px;border:1px solid var(--line);background:#fff;border-radius:12px;
+  box-shadow:0 1px 0 rgba(21,33,28,.04),0 14px 34px -22px rgba(21,33,28,.22);overflow:hidden}
+.sr-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.sr-title{font-family:var(--cond);font-weight:700;font-size:16px;margin-right:auto}
+.sr-toggle{display:flex;gap:6px;flex-wrap:wrap}
+.sr-toggle button{font-family:var(--thai);font-size:12.5px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);
+  background:#fff;color:var(--muted);cursor:pointer;transition:all .15s}
+.sr-toggle button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.sr-body{padding:8px 18px 4px}
+.sr-readout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--line)}
+.sr-cell{padding:13px 18px;border-right:1px solid var(--line)}
+.sr-cell:last-child{border-right:none}
+.sr-cell .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.sr-cell .v{font-family:var(--mono);font-size:21px;font-weight:600;margin-top:2px}
+.sr-cell .v small{font-size:12px;color:var(--muted);font-weight:400}
+@media(max-width:680px){.sr-readout{grid-template-columns:1fr}.sr-cell{border-right:none;border-bottom:1px solid var(--line)}.sr-cell:last-child{border-bottom:none}}
+.sr-note{padding:11px 18px 14px;font-size:13.5px;color:var(--muted);line-height:1.6}
+
+/* generic card / callout */
+.card{border:1px solid var(--line);background:#fff;border-radius:12px;padding:20px 22px;margin:18px 0;
+  box-shadow:0 1px 0 rgba(21,33,28,.04)}
+.callout{border-left:4px solid var(--binance-fill);background:var(--binance-soft);border-radius:0 10px 10px 0;
+  padding:14px 18px;margin:18px 0;max-width:78ch}
+.callout.red{border-left-color:var(--loss);background:var(--loss-soft)}
+.callout.blue{border-left-color:var(--tfex);background:var(--tfex-soft)}
+.callout.green{border-left-color:var(--gain);background:var(--gain-soft)}
+.callout p{margin:0 0 6px}.callout p:last-child{margin:0}
+.callout .ttl{font-family:var(--cond);font-weight:700;font-size:15.5px;letter-spacing:.01em;display:block;margin-bottom:5px}
+
+/* tables */
+.tablewrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:10px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+caption{caption-side:top;text-align:left;font-family:var(--cond);font-weight:700;font-size:15px;padding:12px 16px 4px}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  text-align:left;padding:10px 16px;border-bottom:2px solid var(--ink);white-space:nowrap}
+td{padding:9px 16px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:last-child td{border-bottom:none}
+td.num,th.num{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr.hl td{background:var(--tfex-soft)}
+tr.hl-b td{background:var(--binance-soft)}
+
+/* code blocks */
+.codeblock{background:var(--codebg);color:var(--codetx);border-radius:12px;margin:16px 0;overflow:hidden;
+  box-shadow:0 14px 30px -20px rgba(16,25,21,.55)}
+.code-head{display:flex;align-items:center;gap:10px;padding:9px 16px;background:#18241E;
+  font-family:var(--mono);font-size:11.5px;color:#9FB3A8;letter-spacing:.05em}
+.code-head .lang{margin-left:auto;color:#71857A}
+pre{padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.6;tab-size:4}
+pre code{font-family:inherit}
+.cm{color:var(--codecm);font-style:italic}.st{color:var(--codest)}.kw{color:var(--codekw)}.nm{color:var(--codenum)}.fn{color:#C9A7F5}
+code.inline{font-family:var(--mono);font-size:.86em;background:var(--soft);border:1px solid var(--line);
+  border-radius:5px;padding:1px 6px;white-space:nowrap}
+
+/* equation strip */
+.eq{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;
+  padding:14px 18px;margin:14px 0;overflow-x:auto;white-space:pre;line-height:1.7}
+.eq b{color:var(--tfex)} .eq i{color:var(--binance);font-style:normal} .eq u{color:var(--loss);text-decoration:none}
+
+/* flow diagram + session map drawn via SVG share .figure */
+.figure{border:1px solid var(--line);background:#fff;border-radius:12px;padding:16px 16px 8px;margin:18px 0}
+.figure figcaption{font-size:13.5px;color:var(--muted);padding:8px 4px 8px;line-height:1.6}
+.figure svg{display:block;width:100%;height:auto}
+
+/* interactive widgets */
+.widget{border:1px solid var(--ink);background:#fff;border-radius:14px;margin:22px 0;overflow:hidden;
+  box-shadow:0 18px 40px -28px rgba(21,33,28,.35)}
+.widget-head{background:var(--ink);color:#F1F6F2;padding:12px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.widget-head .wt{font-family:var(--cond);font-weight:700;font-size:16px}
+.widget-head .badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;background:var(--binance-fill);
+  color:#15211C;padding:2px 8px;border-radius:4px;font-weight:600}
+.widget-body{padding:18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+@media(max-width:760px){.widget-body{grid-template-columns:1fr}}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-family:var(--thai);font-size:12.5px;letter-spacing:.01em;color:var(--muted);margin-bottom:6px}
+.fld select,.fld input[type=number]{width:100%;font-family:var(--mono);font-size:14px;padding:9px 11px;
+  border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.fld input[type=range]{width:100%;accent-color:var(--ink)}
+.fld .rangeval{font-family:var(--mono);font-size:13px;color:var(--ink);margin-top:4px}
+.tierseg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tierseg button{font-family:var(--mono);font-size:12.5px;padding:8px 6px;border:1px solid var(--line);background:#fff;
+  border-radius:8px;cursor:pointer;color:var(--muted);transition:all .12s}
+.tierseg button.on{background:var(--tfex);border-color:var(--tfex);color:#fff;font-weight:600}
+.outrow{display:flex;justify-content:space-between;gap:14px;padding:9px 2px;border-bottom:1px dashed var(--line);font-size:14px}
+.outrow:last-child{border-bottom:none}
+.outrow span:first-child{font-family:var(--thai)}
+.outrow .ov{font-family:var(--mono);font-weight:600;white-space:nowrap}
+.verdict{margin-top:12px;border-radius:10px;padding:13px 15px;font-size:14.5px;border:1px solid transparent;line-height:1.6}
+.verdict.go{background:var(--gain-soft);border-color:#BBDCC9;color:#114A2F}
+.verdict.no{background:var(--loss-soft);border-color:#EBC2B9;color:#7C2317}
+.verdict .big{font-family:var(--mono);font-size:19px;font-weight:600;display:block;margin-top:2px}
+
+/* checklist */
+.checklist{list-style:none;margin:16px 0;max-width:78ch}
+.checklist li{display:flex;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line);align-items:flex-start;line-height:1.6}
+.checklist li::before{content:'';flex:0 0 18px;height:18px;border:2px solid var(--ink);border-radius:4px;margin-top:3px}
+.checklist li b{font-weight:600}
+
+/* footer */
+footer.site{border-top:1px solid var(--line);margin-top:60px;padding:28px 0 50px;font-size:13.5px;color:var(--muted)}
+footer .cols{display:grid;grid-template-columns:1fr 1fr;gap:30px;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+@media(max-width:760px){footer .cols{grid-template-columns:1fr}}
+footer h4{font-family:var(--cond);font-size:15px;color:var(--ink);margin-bottom:8px}
+footer ul{list-style:none}footer li{margin-bottom:5px}
+</style>
+</head>
+<body>
+
+<div class="disclaimer-strip"><b>เพื่อการศึกษาเท่านั้น</b> · นี่คือ statistical arbitrage = การเดิมพันเชิงสถิติ ไม่ใช่กำไรที่ปลอดความเสี่ยง · ไม่ใช่คำแนะนำการลงทุน · โค้ดในนี้ไม่ส่งคำสั่งซื้อขายจริง</div>
+
+<header class="site">
+  <div class="site-inner">
+    <div class="mark"><span class="dot t"></span><span class="dot b"></span> หนึ่งดอลลาร์ สองราคา</div>
+    <div class="site-meta">set-bot-lab · tutorial · June 2026 · Bangkok</div>
+  </div>
+</header>
+
+<div class="shell">
+
+<nav class="rail" id="rail">
+  <div class="rail-label">บทเรียน</div>
+  <a href="#s0"><span class="n">00</span> ภาพรวม</a>
+  <a href="#s1"><span class="n">01</span> ป้ายเตือน</a>
+  <a href="#s2"><span class="n">02</span> รู้จักสองตลาด</a>
+  <a href="#s3"><span class="n">03</span> ทำไมเกิดช่องว่าง</a>
+  <a href="#s4"><span class="n">04</span> ต้นทุนเลขเดียว</a>
+  <a href="#s5"><span class="n">05</span> ข้อมูล bid/ask</a>
+  <a href="#s6"><span class="n">06</span> ติดตั้ง</a>
+  <a href="#s7"><span class="n">07</span> โค้ด Python</a>
+  <a href="#s8"><span class="n">08</span> เคสตัวอย่าง</a>
+  <a href="#s9"><span class="n">09</span> อะไรทำให้พัง</a>
+  <a href="#s10"><span class="n">10</span> เช็กลิสต์</a>
+</nav>
+
+<main>
+
+<!-- ================= HERO ================= -->
+<div class="hero">
+  <div class="eyebrow">คู่มือ step-by-step · Binance TH (spot) × TFEX (futures)</div>
+  <h1>หนึ่งดอลลาร์ สองราคา<span class="en">One Dollar, Two Prices — in Bangkok</span></h1>
+  <p class="hero-sub">ราคาของ "1 ดอลลาร์ คิดเป็นกี่บาท" จริง ๆ แล้วมีอยู่ <strong>2 ที่</strong> — ฝั่ง <span class="chip b">spot</span> คือ USDT/THB บน <strong>Binance TH</strong> (จ่ายบาทแล้วได้เหรียญมาถือทันที) กับฝั่ง <span class="chip t">futures</span> คือ <strong>USDM26 บน TFEX</strong> (สัญญาล่วงหน้าค่าเงิน) ส่วนใหญ่สองราคานี้แทบเท่ากัน แต่บางที — แค่ไม่กี่นาทีหรือไม่กี่ชั่วโมง — มัน <em>ไม่เท่ากัน</em> คู่มือนี้สอนตั้งแต่ช่องว่างนั้นวัดยังไง เก็บแล้วเสียค่าอะไรบ้าง และทำไม <strong>เทียร์ค่าธรรมเนียม</strong> ต่างหากที่ตัดสินทุกอย่าง ไม่ใช่ตัวสัญญาณ</p>
+  <div class="hero-tags">
+    <span class="chip t">TFEX · futures มีคนกำกับ</span>
+    <span class="chip b">Binance TH · spot คริปโต</span>
+    <span class="chip g">Python · ข้อมูล bid/ask จริง</span>
+    <span class="chip r">พูดเรื่องความเสี่ยงตรง ๆ</span>
+  </div>
+
+  <div class="spreadrail" id="spreadrail">
+    <div class="sr-head">
+      <div class="sr-title">ช่องว่างราคา บนแกนเดียว</div>
+      <div class="sr-toggle" role="tablist" aria-label="สถานการณ์">
+        <button data-sc="0" class="on">วันปกติ</button>
+        <button data-sc="1">วัน spike (แบบ 27 พ.ค.)</button>
+        <button data-sc="2">spike − ต้นทุน</button>
+      </div>
+    </div>
+    <div class="sr-body">
+      <svg id="srsvg" viewBox="0 0 960 182" role="img" aria-label="จุดราคาสองจุดบนแกน บาทต่อดอลลาร์ พร้อมช่องว่างระหว่างกัน"></svg>
+    </div>
+    <div class="sr-readout">
+      <div class="sr-cell"><div class="k">Binance TH bid</div><div class="v" id="sr-b" style="color:var(--binance)">33.05 <small>THB/USDT</small></div></div>
+      <div class="sr-cell"><div class="k">TFEX ask</div><div class="v" id="sr-t" style="color:var(--tfex)">32.75 <small>THB/USD</small></div></div>
+      <div class="sr-cell"><div class="k" id="sr-gk">ช่องว่างที่เทรดได้</div><div class="v" id="sr-g">0.30 <small>THB/USD</small></div></div>
+    </div>
+    <div class="sr-note" id="sr-note">ลองกดสลับสถานการณ์ดู — เส้นประแดงในภาพที่สามคือ <b>entry bar</b> (ต้นทุนไป-กลับทั้งหมด) เฉพาะช่องว่างที่อยู่ <em>เหนือ</em> เส้นเท่านั้นที่เป็นของเรา</div>
+  </div>
+</div>
+
+<!-- ================= STEP 0 ================= -->
+<section class="step" id="s0">
+  <div class="step-head"><span class="step-no">00</span><span class="step-kicker">ภาพรวม</span></div>
+  <h2>คู่มือนี้จะพาไปถึงไหน</h2>
+  <p class="lede">เส้นทางครบ ๆ จาก <em>ศูนย์</em> จนรัน simulation บนราคาจริงที่เก็บไว้ได้เอง — เป็นเส้นทางเดียวกับ notebook ในโปรเจกต์ แต่เล่าใหม่ให้คนที่เพิ่งเห็นครั้งแรกเข้าใจ</p>
+
+  <div class="card">
+    <h3 style="margin-top:0">จบคู่มือนี้แล้วคุณจะ:</h3>
+    <div class="tablewrap" style="border:none;margin:6px 0 0"><table style="min-width:0">
+      <tr><td class="num" style="width:36px;font-weight:600">1</td><td><strong>อธิบายกลยุทธ์ได้ใน 1 ประโยค</strong> — พอดอลลาร์ตัวเดียวกันแพงกว่าในตลาดหนึ่ง ก็ขายฝั่งที่แพง ซื้อฝั่งที่ถูก แล้วรอให้ช่องว่างปิด จบ</td></tr>
+      <tr><td class="num" style="font-weight:600">2</td><td><strong>พูดได้ตรง ๆ ว่ามันคือเทรดแบบไหน</strong> — statistical arbitrage คือการเดิมพันว่าราคาจะกลับมาหากัน (mean-reversion) ไม่ใช่กำไรที่การันตี และจะเข้าใจว่าทำไมคำว่า "statistical" คือป้ายเตือน</td></tr>
+      <tr><td class="num" style="font-weight:600">3</td><td><strong>คำนวณเลขเดียวที่สำคัญที่สุด</strong> — ต้นทุนไป-กลับต่อ 1 USD และอ่านตาราง VIP fee ของ Binance TH ให้เป็นแบบเทรดเดอร์ ไม่ใช่นักท่องเที่ยว</td></tr>
+      <tr><td class="num" style="font-weight:600">4</td><td><strong>รันไพป์ไลน์ Python ได้ทั้งสาย</strong> — ดึง quotes จาก Postgres → จับคู่ bid/ask ให้ตรงเวลา → คำนวณ edge → backtest 25 บรรทัด → ตาราง what-if แต่ละเทียร์</td></tr>
+      <tr><td class="num" style="font-weight:600">5</td><td><strong>เดินเคสจริงทีละขั้นด้วยมือ</strong> — จาก quote หนึ่งภาพ ไปจนเป็นกำไรเป็นบาท แล้วเช็กว่าโค้ดให้เลขตรงกับที่เราคิดเอง</td></tr>
+    </table></div>
+  </div>
+
+  <div class="eq"><b>TFEX USDM26</b> (futures) และ <i>Binance TH USDTTHB</i> (spot)   ต่างก็บอกราคา:  USD เป็นบาท
+spread = <i>ราคา Binance</i> − <b>ราคา TFEX</b>   →  ควรจะ ≈ 0 ... แต่บางทีก็ไม่</div>
+
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> ตลาดสองที่กำลังตอบคำถามเดียวกันว่า "1 ดอลลาร์ = กี่บาท" — พอคำตอบต่างกันเกินต้นทุนทั้งหมด นั่นแหละคือโอกาส แต่ย้ำว่ามันคือ <b>การเดิมพันเชิงสถิติ</b> ไม่ใช่กำไรที่การันตี</p>
+</section>
+
+<hr class="costbar-divider">
+
+<!-- ================= STEP 1 ================= -->
+<section class="step" id="s1">
+  <div class="step-head"><span class="step-no">01</span><span class="step-kicker">ป้ายเตือน</span></div>
+  <h2>"Statistical" arbitrage ไม่ใช่ arbitrage จริง</h2>
+  <p>ถ้าใครเรียกเทรดนี้ว่า "arbitrage" เฉย ๆ แล้วจบ — คำนี้สร้างความรู้สึกปลอดภัยลวง ๆ นะ ในโลกการเงินคลาสสิก <strong>arbitrage จริง</strong> คือกำไรที่รู้ผลแน่นอนตั้งแต่ก่อนเข้า ไม่มีความเสี่ยง ส่วน <strong>statistical arbitrage</strong> คนละเรื่องเลย — มันคือการ <em>เดิมพันเชิงความน่าจะเป็น</em> ว่าความสัมพันธ์ของราคาในอดีตจะยังทำตัวเหมือนเดิมต่อไป</p>
+
+  <div class="tablewrap"><table>
+    <caption>สองเทรดที่หน้าตาคล้ายกัน แต่จริง ๆ ไม่เหมือนกันเลย</caption>
+    <tr><th></th><th>Arbitrage จริง<br><span style="text-transform:none;letter-spacing:0">เช่น คู่ทอง: 10 × MGOM26 = 1 × GOM26</span></th><th>Statistical arbitrage<br><span style="text-transform:none;letter-spacing:0">คู่มือนี้: TFEX USD futures vs Binance TH USDT spot</span></th></tr>
+    <tr><td><strong>ทำไมราคาต้องมาเจอกัน</strong></td><td>ถูกบังคับ <em>ด้วยสัญญา</em> — ทองสองสัญญา cash-settle ที่ <strong>ราคา LBMA เดียวกัน วันเดียวกัน</strong> เดิมพันคือ <em>เมื่อไหร่</em> ไม่ใช่ <em>จะเกิดไหม</em></td><td>ไม่มีอะไรบังคับ — futures ไปเคลียร์ที่ราคา fixing ส่วน USDT เป็น stablecoin บนตลาดคริปโต มันแค่ <em>มักจะ</em> เท่ากัน</td></tr>
+    <tr><td><strong>กรณีแย่สุด</strong></td><td>รอจนหมดอายุสัญญา เดี๋ยวราคาก็มาเจอกันเอง (เพราะสัญญาบังคับ)</td><td>ความสัมพันธ์ <strong>พัง</strong> — ช่องว่างกว้างขึ้นแทนที่จะปิด และอาจรุนแรง</td></tr>
+    <tr><td><strong>บทเรียนดัง</strong></td><td>—</td><td>LTCM ปี 1998: ทีมมีโนเบล โมเดลซับซ้อน เทรด convergence หลายคู่ — แล้วหลายคู่พังพร้อมกันตอนรัสเซีย default</td></tr>
+    <tr><td><strong>วิธี size</strong></td><td>เหมือน arbitrage (แต่ยังต้องดูสภาพคล่อง)</td><td><strong>เหมือนการพนัน</strong> — เล็ก ๆ มีกฎ max-loss ที่ทำตามได้จริง</td></tr>
+  </table></div>
+
+  <div class="callout">
+    <span class="ttl">คำว่า "statistical" คือป้ายเตือน</span>
+    <p>มันแปลว่า: <em>"เรามีหลักฐานในอดีตว่าความสัมพันธ์นี้เคยมีอยู่ — แต่ไม่มีอะไรการันตีว่ามันจะอยู่ต่อ"</em> โครงสร้าง market-neutral (long ขาหนึ่ง short อีกขา) ถูกทำให้ฮิตตั้งแต่ยุค 80 โดยทีม APT ของ Morgan Stanley — <strong>ชื่อ</strong> ติดมาถึงทุกวันนี้ แต่ <strong>ความเสี่ยง</strong> ก็ยังอยู่</p>
+  </div>
+
+  <h3>3 คำถามที่ต้องตอบให้ได้ ก่อนเสี่ยงเงินแม้แต่บาทเดียว</h3>
+  <div class="card">
+    <p><strong>1 — มีเหตุผลเชิงเศรษฐกิจจริงไหม ที่ความสัมพันธ์นี้จะอยู่ต่อ?</strong><br>มี และพอป้องกันตัวได้ — ทั้งสองตลาดตั้งราคา USD เป็นบาท TFEX คือ benchmark ที่มีคนกำกับดูแลในประเทศ ส่วน Binance TH สะท้อนดีมานด์ USDT ของคนไทยเทียบกับสภาพคล่องบาท จริงอยู่ แต่บิดเบือนได้ด้วย flow คริปโต เหตุการณ์สภาพคล่องบาท หรือเหตุเฉพาะตลาด</p>
+    <p><strong>2 — ถ้าความสัมพันธ์พัง กรณีแย่สุดคืออะไร แล้วเรารอดไหม?</strong><br>spread ในอดีตจากสแกนเนอร์ของโปรเจกต์เคยเกิน 1% ถ้าเจอ USDT depeg + เหตุเงินทุนไหลของไทย + สภาพคล่อง TFEX บาง พร้อมกัน อาจไปไกลกว่านั้นมาก — มี leverage ฝั่ง futures บวกเงินเต็มฝั่ง spot ขาดทุนทบเร็วมาก</p>
+    <p><strong>3 — จะ size position ยังไง?</strong><br>ระวัง volatility targeting ตรงนี้ให้ดี — ตอน spread นิ่ง ๆ มันจะ <em>เพิ่ม</em> ขนาดพอดีตอนที่ควรระวังที่สุด และจะลดขนาดก็ต่อเมื่อ divergence เริ่มไปแล้ว ควร size ตาม <strong>ความเสถียรของความสัมพันธ์</strong> (rolling correlation, เช็ก regime) ไม่ใช่ดูแค่ vol ล่าสุด</p>
+  </div>
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> คู่ทอง MGO/GO คือ arbitrage จริง (สัญญาบังคับให้ราคาวิ่งมาเจอกัน) — แต่คู่ USDTTHB ไม่มีอะไรบังคับ ถ้าตอบ 3 คำถามข้างบนไม่ได้ มันก็ไม่ใช่ "statistical arbitrage" แต่เป็น "statistical guess" (เดามั่ว ๆ ที่ใส่เสื้อสถิติ)</p>
+</section>
+
+<hr class="costbar-divider">
+
+<!-- ================= STEP 2 ================= -->
+<section class="step" id="s2">
+  <div class="step-head"><span class="step-no">02</span><span class="step-kicker">รู้จักสองตลาด</span></div>
+  <h2>ทำความรู้จักทั้งสองขา</h2>
+  <p>ก่อนอื่นต้องเคลียร์คำสองคำที่เป็นหัวใจของเรื่องนี้ก่อน เพราะสองขาของเราอยู่คนละ "ประเภทตลาด" — ขาหนึ่งเป็น <strong>spot</strong> อีกขาเป็น <strong>futures</strong>:</p>
+
+  <div class="tablewrap"><table>
+    <caption>spot กับ futures ต่างกันยังไง (ฉบับเข้าใจง่าย)</caption>
+    <tr><th></th><th><span class="chip b">SPOT</span> Binance TH USDT/THB</th><th><span class="chip t">FUTURES</span> TFEX USDM26</th></tr>
+    <tr><td><strong>ซื้อแล้วได้อะไร</strong></td><td>จ่ายบาท ได้ <strong>USDT จริง</strong> มาถือในกระเป๋าทันที (ส่งมอบเดี๋ยวนั้น)</td><td>ได้ <strong>สัญญา</strong> ว่าจะซื้อ/ขาย USD ที่ราคาที่ตกลง ณ วันหมดอายุ — ไม่ได้ถือ USD จริงระหว่างทาง</td></tr>
+    <tr><td><strong>เคลียร์เงินเมื่อไหร่</strong></td><td>ทันที ทุกครั้งที่เทรด</td><td>cash-settle ครั้งเดียวตอนหมดอายุ ที่ราคา fixing 11:00 น.</td></tr>
+    <tr><td><strong>มี leverage ไหม</strong></td><td>ไม่มี — อยากถือ 1,000 USDT ต้องมีเงิน ~1,000 × ราคา เต็มจำนวน</td><td>มี — วางแค่ margin ก้อนเล็กก็คุมมูลค่า 1,000 USD ได้</td></tr>
+    <tr><td><strong>เปิดกี่โมง</strong></td><td>เกือบ 24/7</td><td>เป็น session มีพักเที่ยง และปิดรอบดึกตอน 03:00</td></tr>
+  </table></div>
+  <p>กลยุทธ์นี้คือเอา <strong>spot ฝั่ง Binance</strong> มาประกบกับ <strong>futures ฝั่ง TFEX</strong> ให้หักล้างความเสี่ยงค่าเงินกัน เหลือแค่เดิมพันว่า "สองราคาจะกลับมาเท่ากัน" เท่านั้น</p>
+
+  <h3><span class="chip t">ขา A</span> TFEX USD Futures — benchmark ที่มีคนกำกับ</h3>
+  <p>เป็น futures แบบ cash-settled บนตลาด TFEX ของไทย สัญลักษณ์ใช้รูปแบบ <code class="inline">USD + รหัสเดือน + ปี</code> — มิถุนายน 2026 คือ <code class="inline">USDM26</code> สถาบันและ hedger ช่วยกันคุมให้ราคาใกล้ fair value ในเวลาเปิดทำการ</p>
+  <div class="tablewrap"><table>
+    <caption>สเปกสัญญา (อ้างอิง TFEX ทางการ)</caption>
+    <tr><th>รายการ</th><th>รายละเอียด</th></tr>
+    <tr><td>ขนาดสัญญา</td><td class="mono">1,000 USD</td></tr>
+    <tr><td>หน่วยราคา</td><td class="mono">บาท ต่อ USD, ทศนิยม 2 ตำแหน่ง</td></tr>
+    <tr><td>tick size</td><td class="mono">0.01 บาท/USD = 10 บาท/สัญญา</td></tr>
+    <tr><td>เดือนส่งมอบ</td><td>3 เดือนใกล้สุดติดกัน + ไตรมาสถัดไป (มี.ค./มิ.ย./ก.ย./ธ.ค.)</td></tr>
+    <tr><td>เวลาเทรด</td><td>เช้า + บ่าย + <strong>รอบดึก 18:45–03:00</strong> (วันถัดไป)</td></tr>
+    <tr><td>วันซื้อขายสุดท้าย</td><td>วันทำการก่อนวันทำการสุดท้ายของเดือน หยุดเทรด 11:00 น.</td></tr>
+    <tr><td>การส่งมอบ</td><td>เงินสด ที่ราคา fixing USDTHB 11:00 น. เวลากรุงเทพฯ</td></tr>
+    <tr><td>ค่าธรรมเนียมตลาด</td><td class="mono">≤ 1 บาท/สัญญา/ข้าง (+ ค่าโบรก + VAT 7% ของค่าธรรมเนียม)</td></tr>
+    <tr><td>margin</td><td>วาง initial margin เท่านั้น (กฎ TFEX: IM = 1.75 × maintenance) — เช็กกับโบรกอีกที</td></tr>
+  </table></div>
+
+  <div class="callout red">
+    <span class="ttl">tick size ไม่ใช่ค่าธรรมเนียม — จุดที่มือใหม่สับสนบ่อยสุด</span>
+    <p>"ราคาขยับขั้นต่ำ 0.01 บาท (= 10 บาท/สัญญา)" คือ <em>ก้าวที่ราคาขยับได้น้อยที่สุด</em> — เป็นกฎตลาด ไม่ใช่เงินที่เราจ่าย สิ่งที่เราจ่ายจริงคือ <strong>ค่าโบรก + ค่าธรรมเนียมตลาด + VAT</strong> รวมแล้วราว 25 บาท/สัญญา/ข้าง ตามสมมติฐานของโปรเจกต์นี้ (≈ 0.14–0.28% ไป-กลับ แล้วแต่เรตที่ต่อรองได้)</p>
+  </div>
+
+  <h3><span class="chip b">ขา B</span> Binance TH USDT/THB — ขา spot คริปโต</h3>
+  <p>เป็นการเทรด spot เหรียญ stablecoin USDT เทียบบาท เกือบ 24/7 ราคาสะท้อนดีมานด์ USDT ของคนไทย — ทั้งเทรด, hedge, on/off-ramp — เทียบกับสภาพคล่องบาทที่อยู่บนตลาดนั้น มีสองข้อเท็จจริงที่ครอบงำทุกอย่างหลังจากนี้:</p>
+  <div class="card">
+    <p><strong>ข้อเท็จจริง 1 — USDTTHB เป็น "exchange pair"</strong> ตาราง fee ของ Binance TH มีสองคอลัมน์ คู่บาทที่เทรดในประเทศใช้คอลัมน์ <em>exchange-pair</em> ซึ่งเป็นคอลัมน์ที่แพงกว่า คู่บาทหลายคู่มีโปร 0% แต่ <strong>USDT/THB ถูกยกเว้น</strong></p>
+    <p style="margin-bottom:0"><strong>ข้อเท็จจริง 2 — ค่าธรรมเนียมพื้นฐาน 0.25% ต่อข้าง</strong> ไป-กลับที่ VIP 0 = ~0.50% ของมูลค่า <em>ก่อน</em> slippage ค่าธรรมเนียมแบบ % ของขา spot บดบังค่าคงที่หลักสิบบาทของขา futures จนหมด — <strong>ขา Binance คือต้นทุนของกลยุทธ์นี้</strong> และ Step 04 จะแปลงมันเป็นเลขเดียว</p>
+  </div>
+
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> ขา TFEX (futures) จ่ายค่าธรรมเนียมคงที่หลักสิบบาทต่อสัญญา แต่ขา Binance (spot) คิดเป็น % ของมูลค่า — ต้นทุนเกือบทั้งหมดอยู่ฝั่ง Binance และอย่าลืมว่า tick size 0.01 บาท <b>ไม่ใช่</b> ค่าธรรมเนียม</p>
+</section>
+
+<hr class="costbar-divider">
+
+<!-- ================= STEP 3 ================= -->
+<section class="step" id="s3">
+  <div class="step-head"><span class="step-no">03</span><span class="step-kicker">ทำไมเกิดช่องว่าง</span></div>
+  <h2>สองกลุ่มคน สองนาฬิกา ราคาเดียว</h2>
+  <p>ถ้าทั้งสองตลาดตั้งราคาดอลลาร์ตัวเดียวกัน แล้วทำไมมันถึงไม่ตรงกันได้? เพราะมันคือสองห้องที่เต็มไปด้วยคนละกลุ่มคน เปิดคนละเวลากันไง:</p>
+  <div class="card">
+    <p><strong>คนละกลุ่มผู้เล่น</strong> — ฝั่ง TFEX มี FX desk, hedger, สถาบัน ส่วนฝั่ง Binance TH มีเทรดเดอร์คริปโต, arbitrageur, คนทำ on/off-ramp คลื่นซื้อ USDT ในห้องคริปโตไม่โผล่ไปที่ห้อง futures ทันที</p>
+    <p><strong>คนละเวลาเปิด-ปิด</strong> — Binance เทรดเกือบ 24/7 ส่วน TFEX เทรดเป็น session และปิดรอบดึกตอน 03:00 ช่องว่างที่เปิดตอน 03:05 จะ hedge ไม่ได้จนกว่าจะถึงรอบเช้า</p>
+    <p><strong>ช็อกเป็นช่วง ๆ</strong> — เหตุการณ์คริปโตในไทย เงินทุนไหลเข้า-ออกประเทศ ดีมานด์ USDT พุ่งกะทันหัน ประวัติของโปรเจกต์เห็น spread (จาก mid-price) เกิน 0.3–1%+ เป็นช่วง ๆ หน้าต่างหายากพวกนั้นแหละคือโอกาสทั้งหมด</p>
+    <p style="margin-bottom:0"><strong>สถานะปกติคือศูนย์</strong> — snapshot วันที่ 12 มิ.ย. 2026 ของโปรเจกต์เห็น spread แทบเป็นศูนย์ นั่นคือหน้าตาตลาดเกือบตลอดเวลา — ความอดทนก็คือสถานะการเทรดอย่างหนึ่ง</p>
+  </div>
+
+  <figure class="figure">
+    <svg viewBox="0 0 960 168" role="img" aria-label="นาฬิกา 24 ชั่วโมง เทียบ Binance ที่เทรดตลอดกับ TFEX ที่เป็น session">
+      <style>.lbl{font:11px 'IBM Plex Mono',monospace;fill:#5C6B63}.lbl2{font:600 12px 'IBM Plex Mono',monospace}.lblth{font:600 11px 'Noto Sans Thai','IBM Plex Sans',sans-serif}</style>
+      <text x="8" y="36" class="lbl2" fill="#B45309">BINANCE TH</text>
+      <rect x="120" y="22" width="816" height="20" rx="5" fill="#F59E0B" opacity="0.8"/>
+      <text x="528" y="36" text-anchor="middle" class="lblth" fill="#5A3404">24 / 7 (เว้นช่วง maintenance)</text>
+      <text x="8" y="86" class="lbl2" fill="#2C45A8">TFEX</text>
+      <!-- 24h scale: x = 120 + h*34 -->
+      <rect x="451.5" y="72" width="93.5" height="20" rx="5" fill="#2C45A8"/>
+      <rect x="596"   y="72" width="99.2" height="20" rx="5" fill="#2C45A8"/>
+      <rect x="757.5" y="72" width="178.5" height="20" rx="5" fill="#2C45A8"/>
+      <rect x="120"   y="72" width="102"  height="20" rx="5" fill="#2C45A8"/>
+      <text x="498" y="86" text-anchor="middle" style="font:600 10px 'IBM Plex Mono',monospace" fill="#fff">09:45–12:30</text>
+      <text x="645" y="86" text-anchor="middle" style="font:600 10px 'IBM Plex Mono',monospace" fill="#fff">14:00–16:55</text>
+      <text x="846" y="86" text-anchor="middle" style="font:600 10px 'IBM Plex Mono',monospace" fill="#fff">ดึก 18:45 →</text>
+      <text x="171" y="86" text-anchor="middle" style="font:600 10px 'IBM Plex Mono',monospace" fill="#fff">→ 03:00</text>
+      <g class="lbl">
+        <text x="120" y="120" text-anchor="middle">00</text><text x="222" y="120" text-anchor="middle">03</text>
+        <text x="324" y="120" text-anchor="middle">06</text><text x="426" y="120" text-anchor="middle">09</text>
+        <text x="528" y="120" text-anchor="middle">12</text><text x="630" y="120" text-anchor="middle">15</text>
+        <text x="732" y="120" text-anchor="middle">18</text><text x="834" y="120" text-anchor="middle">21</text>
+        <text x="936" y="120" text-anchor="middle">24</text>
+      </g>
+      <line x1="120" y1="104" x2="936" y2="104" stroke="#D9DFD6"/>
+      <rect x="222" y="60" width="204" height="44" fill="#C0392B" opacity="0.08"/>
+      <text x="324" y="146" text-anchor="middle" class="lblth" fill="#C0392B">⚠ ช่องว่างตรงนี้ = hedge ไม่ได้จนถึง 09:45</text>
+    </svg>
+    <figcaption>เวลากรุงเทพฯ — Binance ไม่เคยหลับ แต่ TFEX หลับ ช่องว่างที่เปิดตอน TFEX ปิดคือ quote ที่เห็นแต่เทรดสวนไม่ได้ — ตัวกรองความสด (freshness filter) ใน Step 07 มีไว้เพื่อเรื่องนี้พอดี</figcaption>
+  </figure>
+
+  <div class="eq">พอ <i>Binance</i> <u>แพง</u>:  ขาย USDT บน <i>Binance (spot)</i>  +  ซื้อ <b>USD futures บน TFEX</b>
+พอ <i>Binance</i> <u>ถูก</u>  :  ซื้อ USDT บน <i>Binance (spot)</i>  +  ขาย <b>USD futures บน TFEX</b>
+จับคู่มูลค่า:  1 สัญญา TFEX = 1,000 USD  ↔  ~1,000 USDT บน Binance</div>
+  <p>Long ขาหนึ่ง short อีกขา — ความเสี่ยงต่อตัวดอลลาร์เองหักล้างกันเกือบหมด เราไม่ได้พนันว่า USD/THB จะขึ้นหรือลง แต่พนันแค่ว่า <strong>สองคำตอบจะกลับมาเท่ากัน</strong> เท่านั้น</p>
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> ตลาดสองห้อง คนละกลุ่มคน คนละเวลาเปิด-ปิด — ช่องว่างเลยเกิดเป็นช่วง ๆ ไม่ใช่ตลอดเวลา และกลยุทธ์นี้เป็น market-neutral: ไม่ได้พนันว่า USD จะขึ้นหรือลง แต่พนันว่า "สองราคาจะกลับมาเท่ากัน"</p>
+</section>
+
+<hr class="costbar-divider">
+
+<!-- ================= STEP 4 ================= -->
+<section class="step" id="s4">
+  <div class="step-head"><span class="step-no">04</span><span class="step-kicker">ต้นทุนเลขเดียว</span></div>
+  <h2>รวมค่าธรรมเนียมทุกอย่างให้เหลือเลขเดียว</h2>
+  <p class="lede">กลยุทธ์ไม่สนความรู้สึกของเรา ไม่สนแพตเทิร์นกราฟ ไม่สนว่าเรามั่นใจแค่ไหน มันสนเลขเดียว: <strong>ไป-กลับหนึ่งรอบเสียเท่าไหร่ คิดเป็นบาทต่อ 1 USD</strong> ช่องว่างต้องชนะเลขนั้น + เผื่อ buffer นิดหน่อย ไม่งั้นก็ไม่มีดีล</p>
+
+  <div class="eq">round_trip = 2 × <i>binance_fee</i> × price     <span class="cm"># ขา Binance: เข้า+ออก คิดเป็น % ของมูลค่า</span>
+           + 2 × <b>0.025</b>                  <span class="cm"># ขา TFEX: ~25 บาท/สัญญา/ข้าง ÷ 1,000 USD</span>
+<u>entry bar  = round_trip + 0.01 buffer</u>   <span class="cm"># คือเส้นประแดงในทุกกราฟ</span></div>
+
+  <p>ถ้าใช้ข้อมูล bid/ask จริง การข้าม book ถูกคิดในราคาอยู่แล้ว — เราซื้อที่ ask ขายที่ bid ดังนั้น executable edge จ่าย spread ไปแล้วก่อนเอามาเทียบกับบาร์ (ถ้า backtest จาก <em>แท่งเทียน</em> แทนล่ะ? ก็ต้องบวก book width ที่มองไม่เห็น: ~0.01 บาทฝั่ง Binance, ~0.02 บาทฝั่ง TFEX วัดจาก order book 10 ระดับจริงของโปรเจกต์)</p>
+
+  <h3>ตาราง VIP ของ Binance TH — อ่านคอลัมน์ขวาให้ถูก</h3>
+  <p><code class="inline">USDTTHB</code> เป็น <strong>exchange pair</strong> ดังนั้นใช้แค่คอลัมน์ขวาเท่านั้น Maker = limit order ที่เราตั้งรอแล้วโดนจับคู่ (ถูกกว่า แต่ไม่การันตีว่าจะได้คิว) Taker = เราข้าม book เข้าเลยตอนนี้ (ได้แน่ แต่แพงกว่า) เทียร์ถูกคำนวณใหม่ <strong>ทุกวัน 01:00 น. เวลาไทย</strong> จาก volume ย้อนหลัง 30 วัน</p>
+  <div class="tablewrap"><table>
+    <caption>ตารางค่าธรรมเนียม spot ของ Binance TH (มีผล 30 เม.ย. 2025)</caption>
+    <tr><th>ระดับ VIP</th><th class="num">volume 30 วัน (USD)</th><th class="num">Broker pairs M/T</th><th class="num">Exchange pairs M/T ← USDTTHB</th></tr>
+    <tr><td>VIP 0</td><td class="num">&lt; 150,000</td><td class="num">0.10% / 0.10%</td><td class="num"><strong>0.25% / 0.25%</strong></td></tr>
+    <tr><td>VIP 1</td><td class="num">≥ 150,000</td><td class="num">0.10% / 0.10%</td><td class="num">0.20% / 0.25%</td></tr>
+    <tr class="hl"><td>VIP 2</td><td class="num">≥ 500,000</td><td class="num">0.09% / 0.10%</td><td class="num"><strong>0.15% / 0.20%</strong></td></tr>
+    <tr><td>VIP 3</td><td class="num">≥ 1,500,000</td><td class="num">0.08% / 0.10%</td><td class="num">0.10% / 0.15%</td></tr>
+    <tr class="hl"><td>VIP 4</td><td class="num">≥ 3,000,000</td><td class="num">0.07% / 0.09%</td><td class="num"><strong>0.10% / 0.10%</strong></td></tr>
+    <tr><td>VIP 5</td><td class="num">≥ 8,000,000</td><td class="num">0.05% / 0.07%</td><td class="num">0.07% / 0.09%</td></tr>
+  </table></div>
+
+  <div class="tablewrap"><table>
+    <caption>บาร์ของแต่ละเทียร์หน้าตาเป็นยังไง (ที่ราคา ≈ 32.90 บาท/USD, ข้อมูล bid/ask, คิดเฉพาะค่าธรรมเนียม)</caption>
+    <tr><th>สถานการณ์</th><th class="num">fee/ข้าง</th><th class="num">Binance ไป-กลับ</th><th class="num">+ TFEX ไป-กลับ</th><th class="num">entry bar (บาท/USD)</th><th class="num">ต่อสัญญา</th><th class="num">คิดเป็น % มูลค่า</th></tr>
+    <tr><td>VIP 0 taker</td><td class="num">0.25%</td><td class="num">0.1645</td><td class="num">0.0500</td><td class="num"><strong>0.2245</strong></td><td class="num">≈ 225 บาท</td><td class="num">0.68%</td></tr>
+    <tr><td>VIP 2 taker</td><td class="num">0.20%</td><td class="num">0.1316</td><td class="num">0.0500</td><td class="num">0.1916</td><td class="num">≈ 192 บาท</td><td class="num">0.58%</td></tr>
+    <tr><td>VIP 2 maker</td><td class="num">0.15%</td><td class="num">0.0987</td><td class="num">0.0500</td><td class="num">0.1587</td><td class="num">≈ 159 บาท</td><td class="num">0.48%</td></tr>
+    <tr class="hl"><td>VIP 4 (M หรือ T)</td><td class="num">0.10%</td><td class="num">0.0658</td><td class="num">0.0500</td><td class="num"><strong>0.1258</strong></td><td class="num">≈ 126 บาท</td><td class="num">0.38%</td></tr>
+    <tr><td style="color:var(--muted)">free (อ้างอิง)</td><td class="num">0.00%</td><td class="num">0.0000</td><td class="num">0.0500</td><td class="num">0.0600</td><td class="num">≈ 60 บาท</td><td class="num">0.18%</td></tr>
+  </table></div>
+  <p>ลองอ่านคอลัมน์สุดท้ายอีกรอบ จาก VIP 0 ถึง VIP 4 บาร์ <strong>ลดเกือบครึ่ง</strong> ข้อมูลเดิม กฎเดิม gap เดิม — บาร์ที่ต่ำกว่าแปลว่ามีจังหวะผ่านเกณฑ์มากขึ้น เข้าได้เร็วขึ้นในแต่ละ spike และทุกดีลเก็บ edge เดิมไว้ได้มากขึ้น <strong>เทียร์ค่าธรรมเนียมคือตัวกลยุทธ์เลย</strong></p>
+
+  <div class="widget" id="barcalc">
+    <div class="widget-head"><span class="wt">เครื่องคำนวณ entry bar</span><span class="badge">INTERACTIVE</span></div>
+    <div class="widget-body">
+      <div>
+        <div class="fld">
+          <label>เลือกสถานการณ์ Binance TH ของคุณ (exchange pair)</label>
+          <div class="tierseg" id="bc-tiers">
+            <button data-fee="0.0025" class="on">VIP 0 · taker · 0.25%</button>
+            <button data-fee="0.0020">VIP 2 · taker · 0.20%</button>
+            <button data-fee="0.0015">VIP 2 · maker · 0.15%</button>
+            <button data-fee="0.0010">VIP 4 · 0.10%</button>
+          </div>
+        </div>
+        <div class="fld">
+          <label>ระดับราคา (บาท ต่อ USD) · <span class="rangeval" id="bc-pv" style="display:inline">32.90</span></label>
+          <input type="range" id="bc-price" min="31.5" max="34.5" step="0.05" value="32.9">
+        </div>
+        <div class="fld">
+          <label>ต้นทุน TFEX ต่อข้าง (บาท ต่อ USD) · <span class="rangeval" id="bc-tv" style="display:inline">0.025</span></label>
+          <input type="range" id="bc-tfex" min="0.010" max="0.060" step="0.005" value="0.025">
+          <div class="small" style="margin-top:4px">≈ ค่าโบรก + ค่าธรรมเนียมตลาด + VAT ต่อสัญญา ÷ 1,000 ถามเรตจริงกับโบรกของคุณ</div>
+        </div>
+      </div>
+      <div>
+        <div class="outrow"><span>Binance ไป-กลับ (2 × fee × price)</span><span class="ov" id="bc-brt" style="color:var(--binance)">0.1645</span></div>
+        <div class="outrow"><span>TFEX ไป-กลับ (2 × ต่อข้าง)</span><span class="ov" id="bc-trt" style="color:var(--tfex)">0.0500</span></div>
+        <div class="outrow"><span>+ buffer เผื่อ</span><span class="ov">0.0100</span></div>
+        <div class="outrow"><span><strong>entry bar</strong> (บาท ต่อ USD)</span><span class="ov" id="bc-bar" style="color:var(--loss)">0.2245</span></div>
+        <div class="outrow"><span>entry bar ต่อสัญญา</span><span class="ov" id="bc-barc">224 บาท</span></div>
+        <div class="verdict no" id="bc-verdict">
+          ช่องว่างต้องมากกว่า <span class="big" id="bc-need">0.2245 บาท/USD ≈ 0.68% ของราคา</span>
+          ถึงจะเริ่มได้กำไรสตางค์แรก
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> รวมค่าธรรมเนียมทุกอย่างให้เหลือ "เลขเดียว" คือต้นทุนไป-กลับต่อ 1 USD — VIP 0 ต้องการ gap ราว 0.68% แต่ VIP 4 ต้องการแค่ 0.38% ลดเกือบครึ่ง <b>เทียร์ค่าธรรมเนียมคือหัวใจของกลยุทธ์</b></p>
+</section>
+
+<hr class="costbar-divider">
+
+<!-- ================= STEP 5 ================= -->
+<section class="step" id="s5">
+  <div class="step-head"><span class="step-no">05</span><span class="step-kicker">ข้อมูล bid/ask</span></div>
+  <h2>ต้อง bid/ask เท่านั้น ไม่งั้นถือว่าไม่เคยเกิด</h2>
+  <p class="lede">กลยุทธ์นี้อยู่หรือตายที่ราคาที่ <strong>เทรดได้จริง</strong> ราคาปิดของแท่งเทียนคือแค่ "เทรดล่าสุดของคนอื่น" — มีแต่ best-bid / best-ask จริงเท่านั้นที่บอกว่า <em>เรา</em> จะได้เท่าไหร่จริง ๆ</p>
+
+  <p>เพราะงี้โปรเจกต์ถึงรัน <code class="inline">settrade-bidask-railway</code> — บริการเล็ก ๆ ที่ deploy บน Railway คอยฟังทั้งสองตลาดตลอด 24 ชม. แล้วเขียนทุก order-book update ลง Postgres:</p>
+
+  <figure class="figure">
+    <svg viewBox="0 0 960 240" role="img" aria-label="สถาปัตยกรรม: feed จาก Settrade และ Binance ไหลเข้า Railway logger เข้า Postgres เข้า notebook">
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5C6B63"/></marker></defs>
+      <style>.bx{rx:10;stroke-width:1.5}.tt{font:600 13px 'IBM Plex Sans Condensed','Noto Sans Thai',sans-serif}.sb{font:10.5px 'IBM Plex Mono',monospace;fill:#5C6B63}.sbth{font:11px 'Noto Sans Thai',sans-serif;fill:#5C6B63}</style>
+      <!-- sources -->
+      <rect class="bx" x="14" y="24" width="216" height="62" fill="#E4E9F8" stroke="#2C45A8"/>
+      <text x="30" y="49" class="tt" fill="#2C45A8">Settrade realtime API</text>
+      <text x="30" y="68" class="sb">subscribe_bid_offer · USDM26</text>
+      <rect class="bx" x="14" y="120" width="216" height="62" fill="#FBEEDB" stroke="#B45309"/>
+      <text x="30" y="145" class="tt" fill="#B45309">Binance TH WebSocket/REST</text>
+      <text x="30" y="164" class="sb">depth stream · USDTTHB</text>
+      <!-- logger -->
+      <rect class="bx" x="330" y="68" width="240" height="74" fill="#15211C" stroke="#15211C"/>
+      <text x="350" y="96" class="tt" fill="#F1F6F2">settrade-bidask-railway</text>
+      <text x="350" y="116" class="sbth" fill="#9FB3A8">logger 24/7 · บน Railway</text>
+      <!-- db -->
+      <rect class="bx" x="664" y="56" width="282" height="98" fill="#fff" stroke="#15211C"/>
+      <text x="684" y="84" class="tt">Postgres</text>
+      <text x="684" y="105" class="sb">bidask_snapshots  (source, symbol, time)</text>
+      <text x="684" y="122" class="sb">bidask_levels     (10 levels × bid/ask)</text>
+      <text x="684" y="142" class="sbth" fill="#1A7A4C">→ notebook ใช้แค่ DATABASE_URL ก็พอ</text>
+      <!-- notebook -->
+      <rect class="bx" x="664" y="186" width="282" height="42" fill="#E2F1E8" stroke="#1A7A4C"/>
+      <text x="684" y="212" class="tt" fill="#114A2F">Jupyter notebooks (คู่มือนี้)</text>
+      <!-- arrows -->
+      <line x1="230" y1="55"  x2="330" y2="92"  stroke="#5C6B63" stroke-width="1.6" marker-end="url(#arr)"/>
+      <line x1="230" y1="151" x2="330" y2="118" stroke="#5C6B63" stroke-width="1.6" marker-end="url(#arr)"/>
+      <line x1="570" y1="105" x2="664" y2="105" stroke="#5C6B63" stroke-width="1.6" marker-end="url(#arr)"/>
+      <line x1="805" y1="154" x2="805" y2="186" stroke="#5C6B63" stroke-width="1.6" marker-end="url(#arr)"/>
+    </svg>
+    <figcaption>ไพป์ไลน์ — notebook ไม่เคยเรียกตลาดสด มันอ่านสิ่งที่ logger เก็บไว้แล้ว ทุก backtest เลยรันบน quote ที่เคยมีอยู่จริง</figcaption>
+  </figure>
+
+  <div class="callout green">
+    <span class="ttl">logger คือ "คูเมือง" (ของได้เปรียบที่ลอกไม่ได้)</span>
+    <p>โอกาสคือวัน spread กว้างที่หายาก — อย่างวันที่ 27 พ.ค. 2026 ในประวัติของโปรเจกต์ คุณดาวน์โหลด order book ของวันนั้นย้อนหลังไม่ได้ <strong>คุณต้องบันทึกมันไว้ตั้งแต่ตอนนั้น</strong> ทุกวันเงียบ ๆ ที่ logger รัน ทำให้ spike ครั้งหน้าวัดผลได้ เปิดมันทิ้งไว้เถอะ</p>
+  </div>
+
+  <h3>ยังไม่มี database? ใช้เส้นทางแท่งเทียน</h3>
+  <p>notebook สองตัวในโปรเจกต์ (<code class="inline">usdthb_fee_tiers_simple.ipynb</code>, <code class="inline">vip_fee_strategy_1m_30d.ipynb</code>) รันกลยุทธ์เดียวกันบน <strong>แท่งเทียน 1 นาที (public)</strong> — klines ของ Binance TH บวก <code class="inline">get_candlestick</code> ทางการของ Settrade — มือใหม่เลยเริ่มได้โดยไม่ต้องมี infra อะไรเลย แต่ทางลัดนี้มาพร้อมสองข้อปรับแบบซื่อสัตย์:</p>
+  <div class="card">
+    <p><strong>1 — คิดค่า book width ที่มองไม่เห็นเข้าไปด้วย</strong> แท่งเทียนซ่อน bid/ask ดังนั้นโมเดลต้นทุนบวก ~0.01 บาท (Binance) + ~0.02 บาท (TFEX) ต่อรอบไป-กลับ</p>
+    <p style="margin-bottom:0"><strong>2 — เทียบกับ "ค่าปกติ" ไม่ใช่เทียบกับศูนย์</strong> พอใช้แท่งเทียน spread จะมี drift ช้า ๆ ติดมา สัญญาณเลยกลายเป็น <em>ส่วนเบี่ยง</em>: <code class="inline">spread − median ย้อนหลัง 4 ชม.</code> และเชื่อเฉพาะนาทีที่ราคาอ้างอิง TFEX สดกว่า 75 นาที — เพราะ Binance เทรดตอน TFEX หลับ</p>
+  </div>
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> ราคาแท่งเทียนคือ "เทรดล่าสุดของคนอื่น" แต่ bid/ask คือ "ราคาที่เราซื้อขายได้จริง" — ตัว logger บน Railway เก็บ order book ทั้งสองตลาดตลอด 24 ชม. ลง Postgres และวัน spread กว้าง ๆ คือสมบัติที่ย้อนกลับไปเก็บไม่ได้</p>
+</section>
+
+<hr class="costbar-divider">
+
+<!-- ================= STEP 6 ================= -->
+<section class="step" id="s6">
+  <div class="step-head"><span class="step-no">06</span><span class="step-kicker">ติดตั้ง</span></div>
+  <h2>ตั้ง workbench Python ให้สะอาดด้วย <span class="mono" style="font-size:.85em">uv</span></h2>
+  <p>ทุกอย่างรันจาก repo เดียว (<code class="inline">set-bot-lab</code>) โดยมี <code class="inline">uv</code> จัดการ environment ให้ สามคำสั่งกับไฟล์ secrets หนึ่งไฟล์:</p>
+
+  <div class="codeblock">
+    <div class="code-head"><span>terminal</span><span class="lang">bash</span></div>
+    <pre><code class="language-bash"># 1. ติดตั้ง uv (ครั้งเดียวต่อเครื่อง)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. ลง dependencies ทั้งหมดจาก pyproject.toml
+cd set-bot-lab
+uv sync
+
+# 3. เปิด — `uv run` การันตีว่าใช้ venv ของโปรเจกต์ (มี psycopg2 ครบ)
+uv run jupyter lab</code></pre>
+  </div>
+
+  <p>สร้างไฟล์ <code class="inline">.env</code> ที่ root ของโปรเจกต์ — <strong>ห้าม commit เด็ดขาด</strong>:</p>
+  <div class="codeblock">
+    <div class="code-head"><span>.env</span><span class="lang">dotenv</span></div>
+    <pre><code class="language-bash"># ทางที่ 1: bid/ask จริงจาก Railway logger ของคุณ (เส้นทางหลักของคู่มือนี้)
+DATABASE_URL=postgresql://user:pass@host:port/db
+
+# ทางที่ 2 (notebook แท่งเทียน / ไปต่อ): credentials ของ Settrade Open API
+SETTRADE_APP_ID=your_app_id
+SETTRADE_APP_SECRET=your_app_secret
+SETTRADE_APP_CODE=your_app_code
+SETTRADE_BROKER_ID=your_broker_id</code></pre>
+  </div>
+
+  <div class="callout red">
+    <span class="ttl">มารยาทการใช้ Settrade API — โปรเจกต์นี้เรียนรู้มาแบบเจ็บตัว</span>
+    <p>Market data ให้ยิงได้ราว <strong>10 requests/นาที</strong> ยิงเกินปุ๊บ API เตะ session ทิ้ง (<code class="inline">Status[Kicked]</code>) แล้วล็อกแอปไว้ 10+ นาที เว้นช่วง ~6 วินาทีต่อ request, <strong>cache ทุกครั้งที่ดึงลงดิสก์</strong> และถ้า credentials ชุดเดียวกันป้อน Railway logger 24/7 อยู่ด้วย — ยิ่งต้องเบามือ โดนเตะแล้วให้ <strong>รอ</strong> อย่า retry วนลูป</p>
+  </div>
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> ใช้ <code class="inline">uv sync</code> + <code class="inline">uv run jupyter lab</code> แล้วเก็บ secrets ไว้ใน <code class="inline">.env</code> เท่านั้น — ส่วน Settrade API จำกัด ~10 req/นาที โดนเตะแล้วต้องรอ 10+ นาที เพราะงั้นเว้นช่วงและ cache ลงดิสก์เสมอ</p>
+</section>
+
+<hr class="costbar-divider">
+
+<!-- ================= STEP 7 ================= -->
+<section class="step" id="s7">
+  <div class="step-head"><span class="step-no">07</span><span class="step-kicker">โค้ด Python</span></div>
+  <h2>จาก quote สู่คำตัดสิน ใน 5 บล็อก</h2>
+  <p class="lede">ไพป์ไลน์ทั้งหมด ย่อจาก <code class="inline">usdtthb_spread_tutorial.ipynb</code> ทุกบล็อกรันได้เลยในโปรเจกต์ และไม่มีบล็อกไหนส่งคำสั่งซื้อขาย</p>
+
+  <h3>7.1 — เช็กสุขภาพ: มี quote ไหม แล้วสดแค่ไหน?</h3>
+  <div class="codeblock">
+    <div class="code-head"><span>block 1 · connect</span><span class="lang">python</span></div>
+    <pre><code class="language-python">import os
+import pandas as pd
+import psycopg2
+from dotenv import load_dotenv
+
+TFEX_SYMBOL, BINANCE_SYMBOL = "USDM26", "USDTTHB"
+
+load_dotenv()
+conn = psycopg2.connect(os.environ["DATABASE_URL"])
+health = pd.read_sql("""
+SELECT source, COUNT(*) AS quotes,
+       MIN(received_at) AT TIME ZONE 'Asia/Bangkok' AS first_quote,
+       MAX(received_at) AT TIME ZONE 'Asia/Bangkok' AS last_quote
+FROM bidask_snapshots
+WHERE (source = 'settrade'   AND symbol = %(t)s)
+   OR (source = 'binance_th' AND symbol = %(b)s)
+GROUP BY source
+""", conn, params={"t": TFEX_SYMBOL, "b": BINANCE_SYMBOL})
+conn.close()
+print("Database OK"); display(health)</code></pre>
+  </div>
+
+  <h3>7.2 — โหลด level-1 แล้วจับเวลาสองตลาดให้ตรงกัน</h3>
+  <p>ทริคที่สำคัญที่สุดในไพป์ไลน์เลย Binance กับ TFEX quote คนละจังหวะ — เอาราคาสดไปเทียบกับราคาเก่า = สร้าง <strong>spread ปลอม</strong> ขึ้นมา <code class="inline">merge_asof</code> จะแนบ quote TFEX ล่าสุดให้ทุก quote Binance แต่ต่อเมื่อมันอายุน้อยกว่า <strong>2 วินาที</strong> เท่านั้น:</p>
+  <div class="codeblock">
+    <div class="code-head"><span>block 2 · load + align</span><span class="lang">python</span></div>
+    <pre><code class="language-python">MAX_QUOTE_AGE_SECONDS = 2   # ห้ามเทียบ quote ที่ห่างกันเกินนี้
+
+conn = psycopg2.connect(os.environ["DATABASE_URL"])
+raw = pd.read_sql("""
+SELECT s.source, s.received_at,
+  MAX(l.price) FILTER (WHERE l.side = 'bid' AND l.level = 1) AS bid,
+  MAX(l.price) FILTER (WHERE l.side = 'ask' AND l.level = 1) AS ask
+FROM bidask_snapshots s
+JOIN bidask_levels l ON l.snapshot_id = s.id
+WHERE (s.source = 'settrade'   AND s.symbol = %(t)s)
+   OR (s.source = 'binance_th' AND s.symbol = %(b)s)
+GROUP BY s.id, s.source, s.received_at
+ORDER BY s.received_at
+""", conn, params={"t": TFEX_SYMBOL, "b": BINANCE_SYMBOL})
+conn.close()
+
+raw["received_at"] = (pd.to_datetime(raw["received_at"], utc=True)
+                        .dt.tz_convert("Asia/Bangkok"))
+raw[["bid", "ask"]] = raw[["bid", "ask"]].astype(float)
+
+tfex = (raw[raw.source == "settrade"]
+        .rename(columns={"bid": "tfex_bid", "ask": "tfex_ask"})
+        [["received_at", "tfex_bid", "tfex_ask"]].sort_values("received_at"))
+binance = (raw[raw.source == "binance_th"]
+        .rename(columns={"bid": "binance_bid", "ask": "binance_ask"})
+        [["received_at", "binance_bid", "binance_ask"]].sort_values("received_at"))
+
+pairs = pd.merge_asof(binance, tfex, on="received_at", direction="backward",
+                      tolerance=pd.Timedelta(seconds=MAX_QUOTE_AGE_SECONDS)
+                     ).dropna().reset_index(drop=True)
+print(f"Matched quote pairs: {len(pairs):,}")</code></pre>
+  </div>
+
+  <h3>7.3 — executable edge (ราคาที่เทรดได้จริง)</h3>
+  <p>Mid บอกแค่ว่าตลาด <em>ดูเหมือน</em> ห่างกันแค่ไหน แต่ edge บอกว่าถ้าข้าม book ทั้งสองฝั่ง <em>จริง ๆ</em> จะเก็บได้เท่าไหร่ การตัดสินใจเทรดใช้ edge:</p>
+  <div class="codeblock">
+    <div class="code-head"><span>block 3 · edges</span><span class="lang">python</span></div>
+    <pre><code class="language-python">pairs["binance_mid"] = (pairs.binance_bid + pairs.binance_ask) / 2
+pairs["tfex_mid"]    = (pairs.tfex_bid + pairs.tfex_ask) / 2
+pairs["mid_spread_pct"] = (pairs.binance_mid - pairs.tfex_mid) / pairs.tfex_mid * 100
+
+# สิ่งที่เก็บได้จริง ถ้าข้าม book ทั้งสองฝั่งตอนนี้:
+pairs["edge_short_usdt"] = pairs.binance_bid - pairs.tfex_ask  # Binance แพง
+pairs["edge_long_usdt"]  = pairs.tfex_bid - pairs.binance_ask  # Binance ถูก
+
+# ค่าธรรมเนียม -> เลขเดียว (Step 04)
+BINANCE_FEE_RATE = 0.0025        # <-- เทียร์จริงของคุณ 0.25% = VIP 0
+TFEX_COST_PER_SIDE_THB = 0.025
+ENTRY_BUFFER_THB, EXIT_TOLERANCE_THB = 0.01, 0.01
+
+avg_price = pairs.binance_mid.mean()
+ROUND_TRIP_COST_THB = 2 * BINANCE_FEE_RATE * avg_price + 2 * TFEX_COST_PER_SIDE_THB
+print(f"entry bar: {ROUND_TRIP_COST_THB + ENTRY_BUFFER_THB:.4f} THB/USD")</code></pre>
+  </div>
+
+  <h3>7.4 — backtest 25 บรรทัด</h3>
+  <p>ถือ position ทีละหนึ่ง เข้าเมื่อ edge ชนะบาร์ ออกเมื่อ edge <em>ฝั่งตรงข้าม</em> บอกว่าช่องว่างหายไปแล้ว (ตอนนั้นปิดเสียต้นทุนแทบเป็นศูนย์) กำไรต่อ USD = entry edge + closing edge − ต้นทุนไป-กลับ:</p>
+  <div class="codeblock">
+    <div class="code-head"><span>block 4 · backtest</span><span class="lang">python</span></div>
+    <pre><code class="language-python">def run_backtest(df, round_trip_cost, entry_buffer, exit_tolerance):
+    position, trades = None, []
+    for row in df.itertuples():
+        if position is None:                       # FLAT: หาจังหวะเข้า
+            if row.edge_short_usdt - round_trip_cost >= entry_buffer:
+                position = {"side": "short_usdt_binance_long_tfex",
+                            "entry_ts": row.received_at,
+                            "entry_edge": row.edge_short_usdt}
+            elif row.edge_long_usdt - round_trip_cost >= entry_buffer:
+                position = {"side": "long_usdt_binance_short_tfex",
+                            "entry_ts": row.received_at,
+                            "entry_edge": row.edge_long_usdt}
+        else:                                      # มี position: หาทางออก
+            closing = (row.edge_long_usdt if position["side"].startswith("short")
+                       else row.edge_short_usdt)
+            if closing >= -exit_tolerance:         # ช่องว่างหายแล้ว
+                pnl = position["entry_edge"] + closing - round_trip_cost
+                trades.append({**position,
+                               "exit_ts": row.received_at, "exit_edge": closing,
+                               "pnl_thb_per_contract": pnl * 1000})
+                position = None
+    return pd.DataFrame(trades)
+
+trades = run_backtest(pairs, ROUND_TRIP_COST_THB,
+                      ENTRY_BUFFER_THB, EXIT_TOLERANCE_THB)</code></pre>
+  </div>
+
+  <div class="callout blue">
+    <span class="ttl">0 เทรด ก็เป็นผลลัพธ์ ไม่ใช่บั๊ก</span>
+    <p>ในหน้าต่างเงียบ ๆ edge ทั่วไป (0.01–0.04 บาท) ต่ำกว่าบาร์ VIP 0 ที่ ~0.22 อยู่เยอะมาก notebook จะพิมพ์ 5 จังหวะที่เฉียดที่สุดแทนการฝืนเข้าเทรด backtest ที่ซื่อสัตย์บอกว่า "ไม่มีอะไรผ่านเกณฑ์" มีค่ากว่าตัวที่โลกสวยแล้วโกหก</p>
+  </div>
+
+  <h3>7.5 — what-if: เล่นข้อมูลชุดเดิมซ้ำทุกเทียร์</h3>
+  <div class="codeblock">
+    <div class="code-head"><span>block 5 · fee what-if</span><span class="lang">python</span></div>
+    <pre><code class="language-python">rows = []
+for label, fee in [("VIP0 taker", 0.0025), ("VIP2 taker", 0.0020),
+                   ("VIP2 maker*", 0.0015), ("VIP4", 0.0010), ("free (ref)", 0.0)]:
+    rt = 2 * fee * avg_price + 2 * TFEX_COST_PER_SIDE_THB
+    t = run_backtest(pairs, rt, ENTRY_BUFFER_THB, EXIT_TOLERANCE_THB)
+    rows.append({"tier": label, "fee_per_side": f"{fee:.2%}",
+                 "entry_bar": round(rt + ENTRY_BUFFER_THB, 4),
+                 "trades": len(t),
+                 "total_pnl_thb_per_contract":
+                     round(t.pnl_thb_per_contract.sum()) if len(t) else 0})
+display(pd.DataFrame(rows).set_index("tier"))
+# * maker ยังเลี่ยงการข้าม book width ฝั่ง Binance ได้ด้วย — แต่ไม่การันตีว่าจะได้คิว</code></pre>
+  </div>
+  <p>ไม่มีอะไรเปลี่ยนระหว่างรอบ ยกเว้น "ต้นทุน" การแยกตัวแปรแบบนี้คือหัวใจของการสอน — พอจำนวนเทรดและกำไรต่างกันลิบลับในแต่ละแถว สิ่งที่คุณเห็นคือ "มูลค่าของ fee tier" ล้วน ๆ ไม่ใช่กลยุทธ์คนละตัว</p>
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> หัวใจของโค้ดมี 3 อย่าง — (1) <code class="inline">merge_asof</code> + กฎความสด 2 วินาที กัน spread ปลอม, (2) ใช้ executable edge จาก bid/ask จริง ไม่ใช่ mid, (3) backtest ~25 บรรทัดที่เปลี่ยนแค่ "ต้นทุน" แล้วรันซ้ำทุกเทียร์ — ผลต่างที่เห็นคือมูลค่าของ VIP tier ล้วน ๆ</p>
+</section>
+
+<hr class="costbar-divider">
+
+<!-- ================= STEP 8 ================= -->
+<section class="step" id="s8">
+  <div class="step-head"><span class="step-no">08</span><span class="step-kicker">เคสตัวอย่าง</span></div>
+  <h2>หนึ่งดีล เดินด้วยมือ จาก quote สู่บาท</h2>
+  <p class="lede">ตัวเลขบนกราฟมันนามธรรม จนกว่าจะลองเดินดีลจริงผ่านการคำนวณทีละขั้น นี่คือตัวอย่างในรูปแบบที่ข้อมูลมักเป็นในวัน spread กว้าง — จังหวะแบบที่ logger มีไว้เพื่อจับพอดี</p>
+
+  <div class="card">
+    <h3 style="margin-top:0">snapshot — Binance ดูแพง</h3>
+    <div class="tablewrap" style="border:none;margin:6px 0"><table style="min-width:0">
+      <tr><th>ตลาด</th><th class="num">Bid</th><th class="num">Ask</th><th>อ่านว่า</th></tr>
+      <tr class="hl-b"><td><span class="chip b">Binance TH (spot)</span></td><td class="num">33.18</td><td class="num">33.21</td><td>USDT กำลังเทรดแพงในรูปบาทตอนนี้</td></tr>
+      <tr class="hl"><td><span class="chip t">TFEX USDM26 (futures)</span></td><td class="num">32.96</td><td class="num">32.99</td><td>benchmark ที่กำกับดูแลต่ำกว่า</td></tr>
+    </table></div>
+    <p style="margin:6px 0 0">เพราะ Binance คือฝั่งแพง ดีลคือ <strong>ขาย USDT (short) บน Binance spot + ซื้อ USD futures (long) บน TFEX</strong> executable entry edge คือสิ่งที่เก็บได้จากการข้าม book ทั้งสองฝั่งในทิศนั้น:</p>
+  </div>
+
+  <div class="eq">edge_short = <i>binance_bid</i> − <b>tfex_ask</b>  =  <i>33.18</i> − <b>32.99</b>  =  <span style="color:#1A7A4C;font-weight:600">0.19 บาท ต่อ USD</span>
+
+entry bar ที่ VIP 0 (ราคา ≈ 33.10)  =  2 × 0.0025 × 33.10 + 2 × 0.025 + 0.01  =  <u>0.2255</u>
+entry bar ที่ VIP 4 (ราคา ≈ 33.10)  =  2 × 0.0010 × 33.10 + 2 × 0.025 + 0.01  =  <u>0.1262</u></div>
+
+  <div class="callout red">
+    <span class="ttl">gap 0.19 บาทเท่ากันเป๊ะ แต่คำตอบต่างกันคนละโลก</span>
+    <p><strong>เทรดเดอร์ VIP 0:</strong> 0.19 &lt; 0.2255 → <span class="chip r">ไม่เทรด</span> gap ที่ดูน่ากินบนกราฟ ไม่ผ่านแม้แต่บาร์ต้นทุน ได้แต่มองมันปิดไปแล้วได้ศูนย์ — ซึ่งถูกต้องแล้ว</p>
+    <p style="margin-bottom:0"><strong>เทรดเดอร์ VIP 4:</strong> 0.19 &gt; 0.1262 → <span class="chip g">เข้า</span> quote เดียวกันเป๊ะ กลายเป็นสัญญาณจริง นี่คือ Step 04 ที่จับต้องได้: <em>ค่าธรรมเนียม ไม่ใช่ spread เป็นตัวตัดสินว่ามีดีลไหม</em></p>
+  </div>
+
+  <h3>ถือดีล VIP 4 ต่อจนถึงทางออก</h3>
+  <p>คุณถือคู่ market-neutral ไว้ ผ่านไปหลายชั่วโมง สองตลาดกลับมาเจอกัน — Binance ลงมาเท่าระดับ TFEX การปิดคือซื้อ USDT คืนบน Binance แล้วขาย futures พอช่องว่างหายไปแล้ว closing edge ≈ 0 และกำไรคือ entry edge ลบต้นทุนไป-กลับ:</p>
+  <div class="eq">P&L ต่อ USD = entry_edge + closing_edge − round_trip_cost
+            =   0.19     +     0.00     −     0.1162      =  <span style="color:#1A7A4C;font-weight:600">+0.0738 บาท ต่อ USD</span>
+P&L ต่อสัญญา (× 1,000 USD)                              =  <span style="color:#1A7A4C;font-weight:600">+73.8 บาท</span></div>
+
+  <div class="widget" id="casecalc">
+    <div class="widget-head"><span class="wt">เครื่องคำนวณ P&amp;L ของเคส</span><span class="badge">INTERACTIVE</span></div>
+    <div class="widget-body">
+      <div>
+        <div class="fld">
+          <label>entry edge ที่เก็บได้ (บาท ต่อ USD) · <span class="rangeval" id="cc-ev" style="display:inline">0.19</span></label>
+          <input type="range" id="cc-edge" min="0.05" max="0.60" step="0.01" value="0.19">
+          <div class="small" style="margin-top:4px">ตอนเข้า สองตลาดห่างกันแค่ไหน — คือ executable edge</div>
+        </div>
+        <div class="fld">
+          <label>closing edge (บาท ต่อ USD) · <span class="rangeval" id="cc-cv" style="display:inline">0.00</span></label>
+          <input type="range" id="cc-close" min="-0.05" max="0.20" step="0.01" value="0.00">
+          <div class="small" style="margin-top:4px">≈ 0 ถ้า gap ปิดสนิท เป็นบวกถ้ามันวิ่งเลยมาเข้าทางเรา</div>
+        </div>
+        <div class="fld">
+          <label>เทียร์ค่าธรรมเนียมของคุณ</label>
+          <div class="tierseg" id="cc-tiers">
+            <button data-fee="0.0025">VIP 0 · 0.25%</button>
+            <button data-fee="0.0020">VIP 2 · 0.20%</button>
+            <button data-fee="0.0015">VIP 2 mkr · 0.15%</button>
+            <button data-fee="0.0010" class="on">VIP 4 · 0.10%</button>
+          </div>
+        </div>
+        <div class="fld">
+          <label>จำนวนสัญญา (1 = 1,000 USD/ขา) · <span class="rangeval" id="cc-nv" style="display:inline">1</span></label>
+          <input type="range" id="cc-n" min="1" max="10" step="1" value="1">
+        </div>
+      </div>
+      <div>
+        <div class="outrow"><span>entry edge</span><span class="ov" id="cc-o-edge" style="color:var(--gain)">+0.1900</span></div>
+        <div class="outrow"><span>closing edge</span><span class="ov" id="cc-o-close">+0.0000</span></div>
+        <div class="outrow"><span>− ต้นทุนไป-กลับ</span><span class="ov" id="cc-o-cost" style="color:var(--loss)">−0.1162</span></div>
+        <div class="outrow"><span>= สุทธิต่อ USD</span><span class="ov" id="cc-o-net">+0.0738</span></div>
+        <div class="verdict go" id="cc-verdict">
+          ผลของดีลนี้
+          <span class="big" id="cc-result">+73.8 บาท ต่อสัญญา</span>
+        </div>
+        <div class="small" id="cc-vol" style="margin-top:10px">volume ที่สร้างบน Binance: <b>2,000 USD</b> · นับเข้าเกณฑ์ VIP 30 วัน</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <span class="ttl">ทำไม win rate "100%" ถึงไม่ใช่เรื่องน่าอวดอย่างที่คิด</span>
+    <p>backtest ออกก็ต่อเมื่อ gap หายเท่านั้น บนกระดาษเกือบทุกดีลที่ปิดเลยเป็นสีเขียว ความเสี่ยงจริงไม่ใช่ <em>win rate</em> — แต่คือ <strong>การรอ</strong>: เงินทุนถูกล็อกในทั้งสองขาขณะที่ gap ยังเปิดอยู่ และ gap ที่ <em>ไม่ยอมปิดเลย</em> (ความสัมพันธ์พัง) คือการขาดทุนที่ win-rate ซ่อนไว้ Step 09 คือความเสี่ยงตัวนั้น</p>
+  </div>
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> gap เดียวกันที่ 0.19 บาท — VIP 0 ไม่ผ่านบาร์ (ไม่เทรด) แต่ VIP 4 ผ่าน (เทรดได้ +73.8 บาท/สัญญา) ค่าธรรมเนียมตัดสินว่ามี "ดีล" หรือไม่ และ win rate 100% มาจากนิยาม (ออกเมื่อ gap ปิด) — ความเสี่ยงจริงคือ "การรอ" และวันที่ gap ไม่ยอมปิด</p>
+</section>
+
+<hr class="costbar-divider">
+
+<!-- ================= STEP 9 ================= -->
+<section class="step" id="s9">
+  <div class="step-head"><span class="step-no">09</span><span class="step-kicker">อะไรทำให้พัง</span></div>
+  <h2>โหมดความพัง เรียกชื่อมันให้หมด</h2>
+  <p class="lede">ทั้งสองขาตั้งราคา USD เป็นบาทก็จริง แต่สายสัมพันธ์นี้ไม่ได้แข็งเป็นเหล็ก ไม่มีสัญญาใดบังคับให้ spread นี้เป็นศูนย์ — เพราะงั้นต้องรู้ให้ชัดว่าอะไรดึงมันไปผิดทางได้บ้าง</p>
+
+  <div class="card">
+    <p><strong>USDT หลุด peg</strong> — แม้แค่ตกใจชั่วคราว ก็สร้าง basis risk ฝั่ง Binance — stablecoin ที่เรา short หยุดเกาะดอลลาร์ที่เรา long</p>
+    <p><strong>สภาพคล่องคริปโตไทยช็อก</strong> — คลื่นซื้อหรือขาย USDT บน Binance TH ที่ไม่ถึง TFEX ทันที ทำให้ช่องว่างกว้างขึ้นแทนที่จะปิด</p>
+    <p><strong>กฎ/นโยบายเปลี่ยน</strong> — อะไรก็ตามที่กระทบ Binance TH, การเข้าถึง Settrade/TFEX หรือการควบคุมเงินทุนไทย ตัดความสัมพันธ์ได้ข้ามคืน</p>
+    <p><strong>TFEX rollover & ช่วงปิด session</strong> — สภาพคล่องบางลงช่วงใกล้หมดอายุสัญญา edge ตอนตี 3 จะ hedge ไม่ได้จนกว่า TFEX เปิดใหม่</p>
+    <p style="margin-bottom:0"><strong>unwind แบบสหสัมพันธ์</strong> — เมื่อหลายคู่ relative-value พังพร้อมกัน (LTCM 1998) การกระจายความเสี่ยงช่วยไม่ได้ เทรดที่คิดว่าเป็นอิสระต่อกัน กลับวิ่งไปด้วยกัน</p>
+  </div>
+
+  <div class="callout red">
+    <span class="ttl">กฎ sizing ที่ซื่อสัตย์</span>
+    <p>แถว maker ในทุกตาราง fee ดูดีที่สุด — fee ต่ำกว่า ไม่ต้องจ่าย book width แต่ limit order ที่ตั้งรอจะเติม <em>ยากที่สุด</em> ตอนที่ช่องว่างกว้างสุดพอดี (ราคากำลังวิ่งหนีจาก quote ของเรา) และพอมันเติม <em>ทันที</em> บ่อยครั้งก็เพราะตลาดทะลุผ่านเราไปแล้ว performance ของ maker จริง ๆ อยู่ <strong>ระหว่าง</strong> แถว maker กับ taker จำลองทั้งสอง อย่าเชื่อตัวใดตัวเดียว</p>
+  </div>
+
+  <h3>เงินทุนที่ต้องวางไว้ (ต่อ 1 สัญญา)</h3>
+  <p>ต่างจากคู่ทอง — ที่นี่เงินส่วนใหญ่จมอยู่ขา <strong>spot</strong> เพราะ Binance ไม่มี leverage อยากเทรด 1,000 USDT ต้องถือ ~1,000 × ราคา เป็นบาท ส่วนขา TFEX ต้องการแค่ initial margin</p>
+  <div class="tablewrap"><table>
+    <caption>ร่างเงินทุนเริ่มต้น — แทนสมมติฐานด้วยตาราง margin จริงจากโบรกของคุณ</caption>
+    <tr><th>องค์ประกอบ</th><th class="num">จำนวน (บาท)</th><th>หมายเหตุ</th></tr>
+    <tr><td>ขา Binance — 1,000 USDT</td><td class="num">≈ 33,000</td><td>spot ไม่มี leverage เงินเต็มจำนวน</td></tr>
+    <tr><td>TFEX initial margin (1 สัญญา)</td><td class="num">≈ 1,200</td><td class="num"><span class="chip r">สมมติ</span></td></tr>
+    <tr><td>เงินสด buffer (10%)</td><td class="num">≈ 3,300</td><td>mark ทุกวันทั้งสองขา</td></tr>
+    <tr class="hl"><td><strong>เงินทุนเริ่มต้นที่แนะนำ</strong></td><td class="num"><strong>≈ 37,500</strong></td><td>สำหรับ 1 สัญญา</td></tr>
+  </table></div>
+
+  <div class="callout blue">
+    <span class="ttl">VIP tier คือของที่ "เช่า" ไม่ใช่ "เป็นเจ้าของ"</span>
+    <p>เทรด 1 สัญญาไป-กลับ = 2,000 USD ของ volume บน Binance VIP 2 ต้องการ ≥ 500,000 USD / 30 วัน VIP 4 ต้องการ ≥ 3,000,000 ค่าธรรมเนียมถูก ๆ ที่ทำให้กลยุทธ์เวิร์ก ต้อง <strong>หามาด้วย volume</strong> เอง — และถ้ากลยุทธ์นี้อย่างเดียวสร้าง volume ไม่พอ เทียร์ก็ต้องถูกเลี้ยงด้วยการเทรดอื่นที่มีต้นทุนของมันเอง ซื่อสัตย์กับตัวเองแล้วใส่มันเข้าไปในภาพรวมด้วย</p>
+  </div>
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> ไม่มีสัญญาใดบังคับให้ spread นี้ปิด — ความเสี่ยงคือ USDT หลุด peg, สภาพคล่องคริปโตไทยช็อก, กฎเปลี่ยน, หรือดีลหลายตัวพังพร้อมกันแบบ LTCM และอย่าลืม: เงินส่วนใหญ่จมอยู่ขา spot (ไม่มี leverage) ส่วน VIP tier ก็ต้อง "เช่า" ด้วย volume ทุก 30 วัน</p>
+</section>
+
+<hr class="costbar-divider">
+
+<!-- ================= STEP 10 ================= -->
+<section class="step" id="s10">
+  <div class="step-head"><span class="step-no">10</span><span class="step-kicker">เช็กลิสต์</span></div>
+  <h2>ก่อนส่งออเดอร์จริงทุกครั้ง</h2>
+  <p class="lede">ทุกข้อต้องซื่อสัตย์ ไม่งั้นมันยังไม่ใช่กลยุทธ์ — แต่เป็นการเดาที่ใส่เสื้อกลยุทธ์ notebook นี้ <strong>ไม่ส่งออเดอร์</strong> ใด ๆ เก็บมันให้เป็นแบบนั้นจนกว่าทุกข้อข้างล่างจะจริง</p>
+
+  <ul class="checklist">
+    <li><b>เข้าใจว่านี่คือการเดิมพัน mean-reversion เชิงความน่าจะเป็น</b> ไม่ใช่ arbitrage ปลอดความเสี่ยง — และตอบ 3 คำถามใน Step 01 ได้แบบอนุรักษนิยมสำหรับคู่นี้โดยเฉพาะ</li>
+    <li><b>ยืนยันเทียร์ค่าธรรมเนียม Binance TH จริงของตัวเองแล้ว</b> ที่ 0.25%/ข้าง กลยุทธ์ไม่เทรด โอกาสทั้งหมดอยู่ที่เรต VIP — และเช็กแล้วว่า volume ตัวเองเลี้ยงเทียร์นั้นได้ไหม</li>
+    <li><b>รู้ต้นทุนไป-กลับจริงทั้งสองขา</b> เป็นบาท/USD และ gap ที่ต้องการชนะบาร์นั้น + buffer</li>
+    <li><b>Railway logger กำลังรันอยู่</b> edge มาเป็นช่วง ต้องมีข้อมูล bid/ask ที่เก็บไว้ในวันกว้าง ๆ และ backtest ดีขึ้นทุกวันที่มันรัน</li>
+    <li><b>เช็ก depth ทั้งสอง book แล้วก่อน size</b> — TFEX เป็นคอขวดบ่อยมาก และ 1,000 USDT อาจขยับฝั่งที่บางกว่า</li>
+    <li><b>เคารพ session ของ TFEX</b> ช่องว่างตอน TFEX ปิด hedge ไม่ได้ จะไม่ถือขาเปลือยข้ามคืน</li>
+    <li><b>มีกฎ max-loss / max-spread-widening ที่ทำตามได้จริง</b> และยอมรับว่าความสัมพันธ์พังได้โดยไม่เตือนล่วงหน้า</li>
+    <li><b>เริ่มที่ 1 สัญญาเป๊ะ ๆ</b> แล้วค่อยขยายหลังเห็น fill จริงและพฤติกรรมจริงเท่านั้น</li>
+  </ul>
+
+  <div class="callout green">
+    <span class="ttl">สรุปแบบซื่อสัตย์ในบรรทัดเดียว</span>
+    <p>edge เวลามันโผล่มา มาจากความไม่สมดุลของสภาพคล่องหรือ flow ชั่วคราวเฉพาะตลาด ในตลาด USDTHB ของไทย การเก็บมันให้มีกำไรต้องอาศัยวินัยเรื่องต้นทุน วินัยเรื่อง sizing และ — เหนือสิ่งอื่นใด — ความถ่อมตนที่จะเคารพว่าความสัมพันธ์เชิงสถิติในอดีตมันพังได้ และมันก็พังจริง วัดทุกอย่าง เริ่มให้เล็กที่สุด อย่าเสี่ยงเกินกว่าที่รับไหว</p>
+  </div>
+  <p class="thai">🇹🇭 <b>สรุปสั้น:</b> ติ๊กครบทุกข้อแบบซื่อสัตย์ก่อนค่อยคิดเรื่องส่งออเดอร์จริง — รู้ต้นทุน, ยืนยันเทียร์ค่าธรรมเนียม, เปิด logger ทิ้งไว้, เคารพเวลาเปิด-ปิด TFEX, มีกฎ stop loss ที่ทำตามได้จริง, และเริ่มที่ 1 สัญญาเสมอ</p>
+</section>
+
+</main>
+</div>
+
+<footer class="site">
+  <div class="cols">
+    <div>
+      <h4>notebook เบื้องหลังคู่มือนี้</h4>
+      <ul>
+        <li class="mono">usdtthb_spread_tutorial.ipynb — bid/ask จริง เส้นทางหลัก</li>
+        <li class="mono">usdthb_fee_tiers_simple.ipynb — เส้นทางแท่งเทียน ไม่ต้องมี DB</li>
+        <li class="mono">vip_fee_strategy_1m_30d.ipynb — เจาะลึก fee tier</li>
+        <li class="mono">gold_mgo_go_tutorial.ipynb — ญาติที่เป็น arbitrage จริง</li>
+        <li class="mono">ARBITRAGE_TUTORIAL.md — คู่มือฉบับข้อความ พูดตรง</li>
+      </ul>
+    </div>
+    <div>
+      <h4>แหล่งอ้างอิงหลัก</h4>
+      <ul>
+        <li><a href="https://www.binance.th/en/faq/spot-trading/4900a0792af24f5e853e2373b84f94e7">ตารางค่าธรรมเนียม spot ของ Binance TH</a></li>
+        <li><a href="https://developer.settrade.com/open-api/document/reference/sdkv2/introduction/python/quick-start">Settrade Open API — Python quick start</a></li>
+        <li><a href="https://www.ylgfutures.co.th/en/futures/tfex/currency/usdthb-futures">สเปก TFEX USD futures</a></li>
+      </ul>
+      <p style="margin-top:14px;font-size:12.5px">สร้างจากโปรเจกต์ <span class="mono">set-bot-lab</span> · ข้อมูลเก็บโดย logger <span class="mono">settrade-bidask-railway</span> เพื่อการศึกษาเท่านั้น ไม่ใช่คำแนะนำการลงทุน</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- SPREAD RAIL (signature) ---------------- */
+  var SC = [
+    {b:33.05, t:32.75, lab:"วันปกติ", gk:"ช่องว่างที่เทรดได้",
+     note:"นี่คือตลาดเกือบตลอดเวลา — สองคำตอบแทบจะตรงกัน ช่องว่างที่ดูเหมือน 0.30 บาท จะหดเร็วมากพอข้าม book ทั้งสองฝั่ง ความอดทนคือสถานะการเทรดอย่างหนึ่ง", bar:false},
+    {b:33.42, t:32.80, lab:"วัน spike", gk:"ช่องว่างที่เทรดได้",
+     note:"หน้าต่าง spread กว้างที่หายาก — แบบที่ Railway logger มีไว้เพื่อจับ Binance วิ่งแพงกว่า benchmark ที่กำกับดูแล ช่องว่างดิบ ๆ คือ 0.62 บาท/USD", bar:false},
+    {b:33.42, t:32.80, lab:"spike − ต้นทุน", gk:"ของเรา หลังหักบาร์",
+     note:"เส้นประแดงคือ entry bar ของ VIP 0 (≈0.22 บาท) เฉพาะช่องว่างที่อยู่ เหนือ เส้นเท่านั้นที่เป็นของเรา — ที่เหลือคือค่าธรรมเนียม ถ้าเทียร์แย่กว่านี้ บาร์จะสูงขึ้นจนกลืน spike ทั้งก้อนได้เลย", bar:true, barv:0.2255}
+  ];
+  var svg = document.getElementById('srsvg');
+  var NS = "http://www.w3.org/2000/svg";
+  var W=960, AXX0=120, AXX1=860, PMIN=32.5, PMAX=33.7;
+  function px(p){ return AXX0 + (p-PMIN)/(PMAX-PMIN)*(AXX1-AXX0); }
+  function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a){e.setAttribute(k,a[k]);} return e; }
+
+  function drawRail(i){
+    var s=SC[i];
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    var yAxis=120;
+    svg.appendChild(el('line',{x1:AXX0,y1:yAxis,x2:AXX1,y2:yAxis,stroke:'#15211C','stroke-width':1.5}));
+    for(var p=32.6;p<=33.6;p+=0.2){
+      var x=px(p);
+      svg.appendChild(el('line',{x1:x,y1:yAxis-4,x2:x,y2:yAxis+4,stroke:'#5C6B63','stroke-width':1}));
+      var tl=el('text',{x:x,y:yAxis+20,'text-anchor':'middle',fill:'#5C6B63',style:"font:10px 'IBM Plex Mono',monospace"});
+      tl.textContent=p.toFixed(1); svg.appendChild(tl);
+    }
+    var axlbl=el('text',{x:AXX1,y:yAxis+38,'text-anchor':'end',fill:'#5C6B63',style:"font:10px 'Noto Sans Thai',sans-serif"});
+    axlbl.textContent="บาท/USD →"; svg.appendChild(axlbl);
+
+    var xt=px(s.t), xb=px(s.b);
+    var lo=Math.min(xt,xb), hi=Math.max(xt,xb);
+
+    var band=el('rect',{x:lo,y:46,width:(hi-lo),height:74,fill:'#15211C','fill-opacity':'0.05'});
+    svg.appendChild(band);
+    if(!reduce){ band.setAttribute('width','0'); var aw=el('animate',{attributeName:'width',from:'0',to:(hi-lo),dur:'0.5s',fill:'freeze'}); band.appendChild(aw); }
+
+    var gy=40;
+    svg.appendChild(el('line',{x1:lo,y1:gy,x2:hi,y2:gy,stroke:'#15211C','stroke-width':1}));
+    svg.appendChild(el('line',{x1:lo,y1:gy,x2:lo,y2:gy+6,stroke:'#15211C','stroke-width':1}));
+    svg.appendChild(el('line',{x1:hi,y1:gy,x2:hi,y2:gy+6,stroke:'#15211C','stroke-width':1}));
+    var graw=(s.b-s.t);
+    var gl=el('text',{x:(lo+hi)/2,y:gy-7,'text-anchor':'middle',fill:'#15211C',style:"font:600 12px 'IBM Plex Mono',monospace"});
+    gl.textContent="gap "+graw.toFixed(2)+" บาท"; svg.appendChild(gl);
+
+    if(s.bar){
+      var bx = xt + (s.barv/(PMAX-PMIN))*(AXX1-AXX0);
+      svg.appendChild(el('rect',{x:lo,y:46,width:(bx-lo),height:74,fill:'#C0392B','fill-opacity':'0.10'}));
+      var bl=el('line',{x1:bx,y1:42,x2:bx,y2:128,stroke:'#C0392B','stroke-width':2,'stroke-dasharray':'5 4'});
+      svg.appendChild(bl);
+      var blt=el('text',{x:bx,y:170,'text-anchor':'middle',fill:'#C0392B',style:"font:600 10px 'IBM Plex Mono',monospace"});
+      blt.textContent="↑ entry bar 0.22"; svg.appendChild(blt);
+      if(hi-bx>40){
+        var yrs=el('text',{x:(bx+hi)/2,y:84,'text-anchor':'middle',fill:'#1A7A4C',style:"font:600 11px 'Noto Sans Thai',sans-serif"});
+        yrs.textContent="ของเรา"; svg.appendChild(yrs);
+      }
+    }
+
+    function marker(x,color,topLabel,priceLabel,up){
+      var g=el('g',{});
+      g.appendChild(el('line',{x1:x,y1:46,x2:x,y2:yAxis,stroke:color,'stroke-width':2}));
+      g.appendChild(el('circle',{cx:x,cy:yAxis,r:6,fill:color,stroke:'#fff','stroke-width':2}));
+      var t2b=el('text',{x:x,y:yAxis-12,'text-anchor':'middle',fill:color,style:"font:600 12px 'IBM Plex Mono',monospace"});
+      t2b.textContent=priceLabel; g.appendChild(t2b);
+      svg.appendChild(g);
+      if(!reduce){ g.setAttribute('opacity','0'); var ao=el('animate',{attributeName:'opacity',from:'0',to:'1',dur:'0.4s',fill:'freeze'}); g.appendChild(ao); }
+    }
+    function vlabel(x,color,name){
+      var t=el('text',{x:x,y:152,'text-anchor':'middle',fill:color,style:"font:600 11px 'IBM Plex Sans Condensed',sans-serif"});
+      t.textContent=name; svg.appendChild(t);
+    }
+    marker(xb,'#B45309','', s.b.toFixed(2), false);
+    marker(xt,'#2C45A8','', s.t.toFixed(2), false);
+    vlabel(xb,'#B45309','Binance');
+    vlabel(xt,'#2C45A8','TFEX');
+
+    document.getElementById('sr-b').innerHTML = s.b.toFixed(2)+' <small>THB/USDT</small>';
+    document.getElementById('sr-t').innerHTML = s.t.toFixed(2)+' <small>THB/USD</small>';
+    document.getElementById('sr-gk').textContent = s.gk;
+    var gval = s.bar ? (graw - s.barv) : graw;
+    var gcol = s.bar ? (gval>0?'#1A7A4C':'#C0392B') : '#15211C';
+    document.getElementById('sr-g').innerHTML = (s.bar&&gval>0?'+':'')+gval.toFixed(2)+' <small>THB/USD</small>';
+    document.getElementById('sr-g').style.color = gcol;
+    document.getElementById('sr-note').innerHTML = s.note;
+  }
+  drawRail(0);
+  var btns = document.querySelectorAll('#spreadrail .sr-toggle button');
+  btns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      btns.forEach(function(b){b.classList.remove('on');});
+      btn.classList.add('on');
+      drawRail(parseInt(btn.getAttribute('data-sc'),10));
+    });
+  });
+
+  /* ---------------- ENTRY-BAR CALCULATOR ---------------- */
+  var bcFee=0.0025;
+  var bcTierBtns=document.querySelectorAll('#bc-tiers button');
+  var bcPrice=document.getElementById('bc-price');
+  var bcTfex=document.getElementById('bc-tfex');
+  function bcCalc(){
+    var price=parseFloat(bcPrice.value), tfexSide=parseFloat(bcTfex.value);
+    document.getElementById('bc-pv').textContent=price.toFixed(2);
+    document.getElementById('bc-tv').textContent=tfexSide.toFixed(3);
+    var brt=2*bcFee*price, trt=2*tfexSide, bar=brt+trt+0.01;
+    document.getElementById('bc-brt').textContent=brt.toFixed(4);
+    document.getElementById('bc-trt').textContent=trt.toFixed(4);
+    document.getElementById('bc-bar').textContent=bar.toFixed(4);
+    document.getElementById('bc-barc').textContent=Math.round(bar*1000).toLocaleString()+' บาท';
+    var pct=bar/price*100;
+    document.getElementById('bc-need').textContent=bar.toFixed(4)+' บาท/USD ≈ '+pct.toFixed(2)+'% ของราคา';
+  }
+  bcTierBtns.forEach(function(b){
+    b.addEventListener('click',function(){
+      bcTierBtns.forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on'); bcFee=parseFloat(b.getAttribute('data-fee')); bcCalc();
+    });
+  });
+  bcPrice.addEventListener('input',bcCalc);
+  bcTfex.addEventListener('input',bcCalc);
+  bcCalc();
+
+  /* ---------------- CASE-STUDY P&L CALCULATOR ---------------- */
+  var ccFee=0.0010;
+  var ccEdge=document.getElementById('cc-edge');
+  var ccClose=document.getElementById('cc-close');
+  var ccN=document.getElementById('cc-n');
+  var ccTierBtns=document.querySelectorAll('#cc-tiers button');
+  var CC_PRICE=33.10;
+  function ccCalc(){
+    var edge=parseFloat(ccEdge.value), close=parseFloat(ccClose.value), n=parseInt(ccN.value,10);
+    document.getElementById('cc-ev').textContent=edge.toFixed(2);
+    document.getElementById('cc-cv').textContent=close.toFixed(2);
+    document.getElementById('cc-nv').textContent=n;
+    var rt=2*ccFee*CC_PRICE+2*0.025;
+    var net=edge+close-rt;
+    document.getElementById('cc-o-edge').textContent='+'+edge.toFixed(4);
+    document.getElementById('cc-o-close').textContent=(close>=0?'+':'')+close.toFixed(4);
+    document.getElementById('cc-o-cost').textContent='−'+rt.toFixed(4);
+    var netEl=document.getElementById('cc-o-net');
+    netEl.textContent=(net>=0?'+':'')+net.toFixed(4);
+    netEl.style.color = net>=0?'var(--gain)':'var(--loss)';
+    var perC=net*1000, total=perC*n;
+    var v=document.getElementById('cc-verdict'), r=document.getElementById('cc-result');
+    if(net>=0){
+      v.className='verdict go';
+      r.textContent='+'+total.toFixed(1)+' บาท ('+n+' สัญญา)';
+    } else {
+      v.className='verdict no';
+      r.textContent=total.toFixed(1)+' บาท — gap ไม่ผ่านบาร์';
+    }
+    document.getElementById('cc-vol').innerHTML='volume ที่สร้างบน Binance: <b>'+(2000*n).toLocaleString()+' USD</b> · นับเข้าเกณฑ์ VIP 30 วัน';
+  }
+  ccTierBtns.forEach(function(b){
+    b.addEventListener('click',function(){
+      ccTierBtns.forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on'); ccFee=parseFloat(b.getAttribute('data-fee')); ccCalc();
+    });
+  });
+  ccEdge.addEventListener('input',ccCalc);
+  ccClose.addEventListener('input',ccCalc);
+  ccN.addEventListener('input',ccCalc);
+  ccCalc();
+
+  /* ---------------- SCROLL-SPY STEP RAIL ---------------- */
+  var links=Array.prototype.slice.call(document.querySelectorAll('#rail a'));
+  var sections=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  function spy(){
+    var y=window.scrollY+120, idx=0;
+    for(var i=0;i<sections.length;i++){ if(sections[i] && sections[i].offsetTop<=y) idx=i; }
+    links.forEach(function(l,i){ l.classList.toggle('active', i===idx); });
+  }
+  window.addEventListener('scroll', spy, {passive:true});
+  spy();
+})();
+</script>
+</body>
+</html>
