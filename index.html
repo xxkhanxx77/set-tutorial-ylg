@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>labs-setbot-tutorial · Overview</title>
+<style>
+:root {
+  --bg: #faf7f2; --bg2: #f1ece3; --ink: #211d18; --muted: #6f675c;
+  --accent: #0d6b58; --accent2: #b97f10; --line: #e3dccf;
+  --card: #ffffff; --code-bg: #f6f2ea; --danger: #a33a2a;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15130f; --bg2: #1c1914; --ink: #ece7dd; --muted: #9b9385;
+    --accent: #56cfae; --accent2: #e0a83c; --line: #2e2a22;
+    --card: #1e1b15; --code-bg: #211e17; --danger: #e07a5f;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 17px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+/* ---- hero ---- */
+header.hero {
+  background: linear-gradient(160deg, var(--bg2), var(--bg) 70%);
+  border-bottom: 1px solid var(--line);
+  padding: clamp(2.5rem, 7vw, 5rem) 1.25rem clamp(2rem, 5vw, 3.5rem);
+}
+.hero-inner, main, footer.colophon div { max-width: 920px; margin: 0 auto; }
+.overline {
+  font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700; margin-bottom: 1.1rem;
+}
+h1 {
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: clamp(2rem, 5.2vw, 3.1rem); line-height: 1.1;
+  letter-spacing: -.015em; margin: 0 0 1rem; font-weight: 600;
+}
+.lede { font-size: clamp(1rem, 2.2vw, 1.18rem); color: var(--muted); margin: 0 0 1.6rem; max-width: 640px; }
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chip {
+  font-size: .76rem; font-weight: 600; padding: .32rem .75rem;
+  border: 1px solid var(--line); border-radius: 999px; color: var(--muted);
+  background: var(--card);
+}
+.chip.live { color: var(--accent); border-color: var(--accent); }
+.chip.warn { color: var(--accent2); border-color: var(--accent2); }
+
+/* ---- sticky nav ---- */
+nav.toc {
+  position: sticky; top: 0; z-index: 9; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+  overflow-x: auto; white-space: nowrap; padding: .55rem 1.25rem;
+  display: flex; gap: .35rem; scrollbar-width: none;
+}
+nav.toc::-webkit-scrollbar { display: none; }
+nav.toc a {
+  font-size: .78rem; font-weight: 600; color: var(--muted); text-decoration: none;
+  padding: .3rem .7rem; border-radius: 999px;
+}
+nav.toc a:hover { color: var(--accent); background: var(--bg2); }
+
+/* ---- main ---- */
+main { padding: clamp(1.5rem, 4vw, 3rem) 1.25rem 4rem; }
+section.block { margin: 3rem 0; }
+h2 {
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: clamp(1.4rem, 3vw, 1.85rem); line-height: 1.2; font-weight: 600;
+  margin: 0 0 1.1rem; padding-top: 1.1rem; position: relative;
+}
+h2::before {
+  content: ""; position: absolute; top: 0; left: 0; width: 52px; height: 3px;
+  background: var(--accent); border-radius: 2px;
+}
+p { margin: .85rem 0; }
+
+/* ---- two strategy cards ---- */
+.grid2 { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+.scard {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.3rem 1.4rem; box-shadow: 0 1px 2px rgb(0 0 0 / .04);
+}
+.scard h3 { margin: .2rem 0 .5rem; font-size: 1.12rem; }
+.scard .tag { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent2); }
+.scard.green .tag { color: var(--accent); }
+.scard p { margin: .5rem 0 0; font-size: .92rem; color: var(--muted); }
+
+/* ---- callout ---- */
+.callout {
+  margin: 1.5rem 0; padding: 1rem 1.3rem; border-left: 4px solid var(--accent2);
+  background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; font-size: .95rem;
+}
+
+/* ---- start path ---- */
+.start { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+.startcard {
+  display: block; text-decoration: none; color: inherit;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.3rem 1.4rem; transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.startcard:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 18px rgb(0 0 0 / .06); }
+.startcard .num { font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.startcard h3 { margin: .35rem 0 .4rem; font-size: 1.18rem; }
+.startcard p { margin: 0; font-size: .9rem; color: var(--muted); }
+.startcard .go { margin-top: .8rem; font-size: .82rem; font-weight: 600; color: var(--accent); }
+
+/* ---- step list ---- */
+.parthead { font-size: .78rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent2); margin: 2.2rem 0 .9rem; }
+.steps { display: flex; flex-direction: column; gap: .7rem; }
+.step {
+  display: flex; gap: 1rem; align-items: flex-start; text-decoration: none; color: inherit;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1rem 1.2rem; transition: border-color .15s, background .15s;
+}
+.step:hover { border-color: var(--accent); background: var(--bg2); }
+.step .badge {
+  flex: 0 0 auto; width: 38px; height: 38px; border-radius: 10px;
+  display: grid; place-items: center; font-weight: 700; font-size: 1.05rem;
+  background: var(--bg2); color: var(--accent); border: 1px solid var(--line);
+}
+.step.star .badge { background: var(--accent); color: #fff; border-color: var(--accent); }
+.step .meta { flex: 1; min-width: 0; }
+.step .meta .name { font-weight: 600; font-size: 1rem; }
+.step .meta .name code { font-size: .82em; color: var(--muted); font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.step .meta .what { font-size: .88rem; color: var(--muted); margin-top: .2rem; }
+.step .formats { flex: 0 0 auto; display: flex; gap: .4rem; align-items: center; font-size: .74rem; }
+.step .formats a { padding: .18rem .5rem; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); text-decoration: none; font-weight: 600; }
+.step .formats a:hover { color: var(--accent); border-color: var(--accent); }
+.step .data { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent2); white-space: nowrap; }
+
+/* ---- doc links ---- */
+.docs { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+.doc { display: block; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.3rem; text-decoration: none; color: inherit; }
+.doc:hover { border-color: var(--accent); }
+.doc .ic { font-size: 1.3rem; }
+.doc h3 { margin: .4rem 0 .3rem; font-size: 1rem; }
+.doc p { margin: 0; font-size: .86rem; color: var(--muted); }
+
+/* ---- setup / code ---- */
+pre {
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1rem 1.2rem; overflow-x: auto; font-size: .82rem; line-height: 1.6;
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+}
+code.inline { background: var(--code-bg); border: 1px solid var(--line); padding: .12em .4em; border-radius: 6px; font-size: .84em; font-family: ui-monospace, Menlo, Consolas, monospace; }
+
+/* ---- is / isn't ---- */
+.isnt { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+.panel h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.panel.is h3 { color: var(--accent); }
+.panel.isnt-x h3 { color: var(--danger); }
+.panel p { margin: 0; font-size: .9rem; color: var(--muted); }
+
+footer.colophon {
+  border-top: 1px solid var(--line); background: var(--bg2);
+  padding: 2rem 1.25rem; font-size: .82rem; color: var(--muted);
+}
+footer.colophon code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
+
+@media (max-width: 720px) {
+  .grid2, .start, .docs, .isnt { grid-template-columns: 1fr; }
+  .step { flex-wrap: wrap; }
+  .step .formats { width: 100%; }
+}
+@media (max-width: 640px) { body { font-size: 16px; } }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <div class="overline">set-bot-lab · tutorial series</div>
+    <h1>Market-neutral trading, learned from real Thai-market data</h1>
+    <p class="lede">A hands-on, read-first course on two market-neutral strategies — every notebook
+      ships with its charts and tables already computed, so you can learn the method without running
+      a thing.</p>
+    <div class="chips">
+      <span class="chip live">real bid/ask data</span>
+      <span class="chip">read top-to-bottom</span>
+      <span class="chip">6 steps</span>
+      <span class="chip warn">no orders placed</span>
+      <span class="chip">no API key to read</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#overview">Overview</a>
+  <a href="#start">Where to start</a>
+  <a href="#course">The course</a>
+  <a href="#docs">Companion docs</a>
+  <a href="#setup">Setup</a>
+  <a href="#scope">What it is</a>
+  <a href="#layout">Layout</a>
+</nav>
+
+<main>
+
+  <!-- OVERVIEW -->
+  <section class="block" id="overview">
+    <h2>What you'll learn</h2>
+    <p>Two <strong>market-neutral</strong> strategies on real Thai-derivatives data — the same idea
+      (profit from a price <em>gap</em>, not from the market going up or down) applied to two different pairs.</p>
+    <div class="grid2">
+      <div class="scard green">
+        <span class="tag">Part A · statistical</span>
+        <h3>The USD dollar spread</h3>
+        <p>Binance TH <code class="inline">USDTTHB</code> vs TFEX USD futures <code class="inline">USDM26</code> —
+          the same dollar priced in baht in two places. It <em>usually</em> reverts, but nothing forces it.</p>
+      </div>
+      <div class="scard">
+        <span class="tag">Part B · convergence</span>
+        <h3>The gold mini/big arbitrage</h3>
+        <p>TFEX <code class="inline">MGO</code> (mini) vs <code class="inline">GO</code> (big) gold futures:
+          10 minis = 1 big, both cash-settling on the <em>same</em> gold price. The gap <em>must</em> close at expiry.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>Every notebook comes with its results already saved.</strong> Open any
+      <code class="inline">.html</code>, <code class="inline">.ipynb</code>, or <code class="inline">.md</code>
+      and read top to bottom — all charts and tables are there. You do <strong>not</strong> need to run
+      anything, and you don't need any data, account, or API key to follow along.
+    </div>
+  </section>
+
+  <!-- WHERE TO START -->
+  <section class="block" id="start">
+    <h2>👉 Where to start</h2>
+    <p>New here? The two <strong>“from zero to simulation” walkthroughs</strong> are the gentlest, most
+      complete way in. Read one end to end first, then dip into the deeper studies.</p>
+    <div class="start">
+      <a class="startcard" href="step_basic_5_usdtthb_walkthrough.html">
+        <div class="num">Start here · Step 5</div>
+        <h3>USD spread, from zero</h3>
+        <p>The friendly, complete version of the USD strategy — from raw prices to a running simulation.</p>
+        <div class="go">Open walkthrough →</div>
+      </a>
+      <a class="startcard" href="step_basic_6_gold_arbitrage.html">
+        <div class="num">Or · Step 6</div>
+        <h3>Gold arbitrage, from zero</h3>
+        <p>The same teaching style on the gold pair — <code class="inline">10 × MGO = 1 × GO</code> convergence.</p>
+        <div class="go">Open walkthrough →</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- THE FULL COURSE -->
+  <section class="block" id="course">
+    <h2>The full course</h2>
+    <p>Each step is provided three ways: a designed web page (<code class="inline">.html</code>), the
+      notebook (<code class="inline">.ipynb</code>), and plain Markdown (<code class="inline">.md</code>).
+      Click a step to open the web page, or pick a format on the right.</p>
+
+    <div class="parthead">Part A — The USD dollar spread strategy</div>
+    <div class="steps">
+      <a class="step" href="step_basic_1_spread.html">
+        <div class="badge">1</div>
+        <div class="meta">
+          <div class="name"><code>step_basic_1_spread</code></div>
+          <div class="what">The two markets and the <strong>spread</strong>, on 1-minute candles.</div>
+        </div>
+        <div class="formats">
+          <a href="step_basic_1_spread.ipynb">ipynb</a>
+          <a href="step_basic_1_spread.md">md</a>
+        </div>
+        <div class="data">Public</div>
+      </a>
+
+      <a class="step" href="step_basic_2_strategy.html">
+        <div class="badge">2</div>
+        <div class="meta">
+          <div class="name"><code>step_basic_2_strategy</code></div>
+          <div class="what">The <strong>strategy</strong>: costs, a backtest, order-book liquidity.</div>
+        </div>
+        <div class="formats">
+          <a href="step_basic_2_strategy.ipynb">ipynb</a>
+          <a href="step_basic_2_strategy.md">md</a>
+        </div>
+        <div class="data">Real bid/ask</div>
+      </a>
+
+      <a class="step" href="step_basic_3_fee_tiers.html">
+        <div class="badge">3</div>
+        <div class="meta">
+          <div class="name"><code>step_basic_3_fee_tiers</code></div>
+          <div class="what">Five <strong>VIP fee tiers</strong> and the <strong>return %</strong>, year-to-date.</div>
+        </div>
+        <div class="formats">
+          <a href="step_basic_3_fee_tiers.ipynb">ipynb</a>
+          <a href="step_basic_3_fee_tiers.md">md</a>
+        </div>
+        <div class="data">Public</div>
+      </a>
+
+      <a class="step" href="step_basic_4_fee_tiers_real.html">
+        <div class="badge">4</div>
+        <div class="meta">
+          <div class="name"><code>step_basic_4_fee_tiers_real</code></div>
+          <div class="what">Fee tiers on <strong>real bid/ask</strong>: maker vs taker, break-even fee.</div>
+        </div>
+        <div class="formats">
+          <a href="step_basic_4_fee_tiers_real.ipynb">ipynb</a>
+          <a href="step_basic_4_fee_tiers_real.md">md</a>
+        </div>
+        <div class="data">Real bid/ask</div>
+      </a>
+
+      <a class="step star" href="step_basic_5_usdtthb_walkthrough.html">
+        <div class="badge">5</div>
+        <div class="meta">
+          <div class="name">⭐ <code>step_basic_5_usdtthb_walkthrough</code></div>
+          <div class="what"><strong>From zero to a running simulation</strong> — the complete guided version.</div>
+        </div>
+        <div class="formats">
+          <a href="step_basic_5_usdtthb_walkthrough.ipynb">ipynb</a>
+          <a href="step_basic_5_usdtthb_walkthrough.md">md</a>
+        </div>
+        <div class="data">Real bid/ask</div>
+      </a>
+    </div>
+
+    <div class="parthead">Part B — The gold mini/big arbitrage (sibling strategy)</div>
+    <div class="steps">
+      <a class="step star" href="step_basic_6_gold_arbitrage.html">
+        <div class="badge">6</div>
+        <div class="meta">
+          <div class="name">⭐ <code>step_basic_6_gold_arbitrage</code></div>
+          <div class="what"><strong>From zero to simulation</strong> on <code>10 × MGO = 1 × GO</code> gold convergence.</div>
+        </div>
+        <div class="formats">
+          <a href="step_basic_6_gold_arbitrage.ipynb">ipynb</a>
+          <a href="step_basic_6_gold_arbitrage.md">md</a>
+        </div>
+        <div class="data">TFEX candles</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- COMPANION DOCS -->
+  <section class="block" id="docs">
+    <h2>Companion docs</h2>
+    <div class="docs">
+      <a class="doc" href="GOLD_MGO_GO_TUTORIAL.md">
+        <div class="ic">📄</div>
+        <h3>GOLD_MGO_GO_TUTORIAL.md</h3>
+        <p>The gold strategy's plain-text setup guide — accounts, costs, margin, and “how much capital
+          do I need?”. Pairs with Step 6.</p>
+      </a>
+      <a class="doc" href="THE_DATA_LOGGER.md">
+        <div class="ic">📡</div>
+        <h3>THE_DATA_LOGGER.md</h3>
+        <p>Where the <strong>real bid/ask</strong> behind steps 2, 4 and 5 comes from: the
+          <code class="inline">settrade-bidask-railway</code> service logging the live order book to PostgreSQL.</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- SETUP -->
+  <section class="block" id="setup">
+    <h2>Setup with <code class="inline">uv</code></h2>
+    <p>Only needed if you want to <em>re-run</em> a notebook. Just reading the course needs none of this —
+      the saved outputs are complete.</p>
+<pre>curl -LsSf https://astral.sh/uv/install.sh | sh   # install uv (once)
+uv sync                                            # build the environment from uv.lock
+uv run jupyter lab                                 # open any step and run it</pre>
+    <p>Re-running needs credentials — copy <code class="inline">.env.example</code> to
+      <code class="inline">.env</code> and fill in:</p>
+    <ul>
+      <li><strong>Settrade API keys</strong> — for the TFEX candle reference (steps 1, 3) and the gold candles (step 6).</li>
+      <li><strong><code class="inline">DATABASE_URL</code></strong> — a PostgreSQL database the data logger has filled with captured bid/ask (steps 2, 4, 5).</li>
+    </ul>
+  </section>
+
+  <!-- IS / ISN'T -->
+  <section class="block" id="scope">
+    <h2>What this is (and isn't)</h2>
+    <div class="isnt">
+      <div class="panel is">
+        <h3>✓ Is</h3>
+        <p>Honest, worked examples of market-neutral strategies on real Thai-market data, with every
+          cost, margin, and assumption stated out loud.</p>
+      </div>
+      <div class="panel isnt-x">
+        <h3>✗ Isn't</h3>
+        <p>Trading advice or an order-placing bot. No notebook places an order, and the numbers describe
+          specific (often quiet) data windows — treat the percentages as a method to learn, not a promised yield.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYOUT -->
+  <section class="block" id="layout">
+    <h2>Project layout</h2>
+<pre>labs-setbot-tutorial/
+├── index.html                         ← you are here
+├── README.md                          ← the same overview, in Markdown
+├── THE_DATA_LOGGER.md                 ← the real-bid/ask data source (steps 2, 4, 5)
+├── GOLD_MGO_GO_TUTORIAL.md            ← the gold strategy setup guide (step 6)
+├── pyproject.toml / uv.lock           ← the uv environment
+├── .env.example                       ← credentials, only needed to re-run
+├── render_tutorial_html.py            ← notebook → designed HTML
+├── step_basic_1..4_*.ipynb            ← USD strategy, research depth
+├── step_basic_5_usdtthb_walkthrough.* ← USD strategy, from-zero walkthrough
+└── step_basic_6_gold_arbitrage.*      ← gold arbitrage, from-zero walkthrough</pre>
+    <p><strong>Notebook lineage:</strong> <code class="inline">spread_usdthb_1m_30d</code> → step 1 ·
+      <code class="inline">simple_spread_strategy</code> → step 2 ·
+      <code class="inline">vip_fee_strategy_1m_ytd</code> → step 3 ·
+      <code class="inline">vip_fee_strategy_real_bidask</code> → step 4 ·
+      <code class="inline">usdtthb_spread_tutorial</code> → step 5 ·
+      <code class="inline">gold_mgo_go_tutorial</code> → step 6.</p>
+  </section>
+
+</main>
+
+<footer class="colophon">
+  <div>
+    <strong>labs-setbot-tutorial</strong> — a read-first course on market-neutral strategies using real
+    Thai-market data. Educational only — not investment advice. Start with
+    <a href="step_basic_5_usdtthb_walkthrough.html">Step 5</a> or
+    <a href="step_basic_6_gold_arbitrage.html">Step 6</a>.
+  </div>
+</footer>
+
+</body>
+</html>

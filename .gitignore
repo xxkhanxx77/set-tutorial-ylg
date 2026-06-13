@@ -1,0 +1,11 @@
+# secrets — never commit real credentials
+.env
+
+# uv / Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# the rendered tutorials (.md, .html, *_files/) and data/ ARE committed on purpose:
+# they are the product students read and run offline.
